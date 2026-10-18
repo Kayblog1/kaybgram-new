@@ -6,121 +6,108 @@
   <title>Kaybgram — Connect your world</title>
   <meta name="theme-color" content="#080d18">
   <style>
-    :root{--bg:#05070d;--panel:#080d18;--panel2:#101827;--line:#202b3e;--blue:#1d9bf0;--blue2:#68c3ff;--text:#eef4fc;--muted:#8190a5;--danger:#ff6b7a;--success:#52d6a0}
+    :root {
+      --bg:#080d18;--panel:#101a2b;--panel2:#14223a;
+      --line:#263754;--blue:#3984ff;--blue2:#65a0ff;
+      --text:#f4f7ff;--muted:#aab8d0;--danger:#ff737e;
+      --success:#55d6a1;
+    }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth;background:var(--bg)}
-    body{margin:0;color:var(--text);background:var(--bg);font-family:Arial,Helvetica,sans-serif;line-height:1.5;padding-bottom:78px}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;color:var(--text);
+      background:radial-gradient(ellipse at top left,#102449 0,transparent 42%),var(--bg);
+      font-family:Arial,Helvetica,sans-serif;line-height:1.55
+    }
     button,input,textarea,select{font:inherit}
     button,a{-webkit-tap-highlight-color:transparent}
     a{color:var(--blue2)}
-    .topbar{position:sticky;top:0;z-index:20;background:rgba(5,7,13,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
-    .topbar-inner{max-width:980px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{font-size:22px;font-weight:900;letter-spacing:.7px;color:#fff;text-decoration:none;white-space:nowrap}
-    .brand span{color:var(--blue)}
-    nav{display:flex;align-items:center;gap:4px;max-width:100%;overflow-x:auto;scrollbar-width:none}
-    nav::-webkit-scrollbar{display:none}
-    nav a{flex:0 0 auto;color:#c5d2e5;text-decoration:none;padding:8px 11px;border-radius:999px;font-size:13px;white-space:nowrap}
-    nav a:hover,nav a[aria-current="page"]{background:#132238;color:#fff}
-    nav a[aria-current="page"]{box-shadow:inset 0 -2px var(--blue)}
-    .wrap{max-width:680px;margin:0 auto;padding:0 0 35px;min-height:65vh}
-    .hero{padding:16px 20px;margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--panel)}
-    .eyebrow{color:var(--blue);font-size:10px;letter-spacing:1.5px;font-weight:bold}
-    .hero h1{font-size:23px;line-height:1.2;margin:4px 0}
-    .hero p{font-size:13px;margin:5px 0 0}
-    h1{margin:8px 0;font-size:clamp(24px,5vw,32px);line-height:1.2}
-    h2{margin:0 0 10px;font-size:20px}
-    h3{margin:0 0 7px;font-size:16px}
+    .topbar{position:sticky;top:0;z-index:10;background:rgba(8,13,24,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+    .topbar-inner{max-width:1120px;margin:auto;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+    .brand{font-size:23px;font-weight:900;letter-spacing:1px;color:white;text-decoration:none}
+    .brand span{color:var(--blue2)}
+    nav{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+    nav a{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:42px;color:#d7e3fa;text-decoration:none;padding:8px;border-radius:12px;font-size:23px;line-height:1}
+    nav a:hover,nav a[aria-current="page"]{background:#1a2c49;color:#fff}
+    nav a[aria-current="page"]{box-shadow:inset 0 -3px 0 var(--blue)}
+    .nav-icon{display:inline-flex;align-items:center;justify-content:center}
+    .nav-badge{position:absolute;top:1px;right:0;min-width:17px;height:17px;padding:1px 4px;border-radius:99px;background:#3984ff;color:#fff;font-size:10px;font-weight:800;line-height:15px;text-align:center}
+    .nav-badge:empty{display:none}
+    .wrap{max-width:850px;margin:25px auto;padding:0 15px 45px}
+    .hero{padding:28px 24px;margin-bottom:17px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(130deg,#142b50,#101a2b 65%)}
+    .eyebrow{color:var(--blue2);font-size:12px;letter-spacing:2px;font-weight:bold}
+    h1{margin:8px 0;font-size:clamp(28px,5vw,42px);line-height:1.15}
+    h2{margin:0 0 12px;font-size:22px}
+    h3{margin:0 0 7px;font-size:17px}
     p{margin-top:5px}
     .muted,.small{color:var(--muted)}
-    .small{font-size:12px}
-    .card{background:var(--panel);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:17px 19px;margin:0;min-width:0;box-shadow:none}
+    .small{font-size:13px}
+    .card{background:rgba(16,26,43,.97);border:1px solid var(--line);border-radius:16px;padding:19px;margin-bottom:16px;min-width:0}
     .hidden{display:none!important}
-    .field{display:block;width:100%;padding:12px 14px;color:var(--text);background:#050a12;border:1px solid #26354a;border-radius:14px;outline:none;margin:7px 0 13px}
-    .field:focus{border-color:var(--blue);box-shadow:0 0 0 2px #1d9bf022}
+    .field{display:block;width:100%;padding:12px 13px;color:var(--text);background:#091221;border:1px solid #304464;border-radius:10px;outline:none;margin:7px 0 13px}
+    .field:focus{border-color:var(--blue);box-shadow:0 0 0 2px #3984ff22}
     textarea.field{min-height:95px;resize:vertical}
     select.field{color-scheme:dark}
-    label{color:#d7e3f4;font-size:13px;font-weight:700}
-    .btn{cursor:pointer;border:0;border-radius:999px;padding:10px 17px;font-weight:750;color:white;background:var(--blue);transition:.15s}
+    label{color:#dce7fa;font-size:13px;font-weight:700}
+    .btn{cursor:pointer;border:0;border-radius:10px;padding:10px 15px;font-weight:700;color:white;background:var(--blue);transition:.15s}
     .btn:hover{filter:brightness(1.12)}
     .btn:disabled{opacity:.55;cursor:wait}
-    .btn.secondary{background:#0d1726;border:1px solid #2c3b52}
-    .btn.danger{background:#54212d;border:1px solid #873847}
-    .btn.tiny{padding:7px 12px;font-size:12px}
+    .btn.secondary{background:#223653;border:1px solid #385071}
+    .btn.danger{background:#582b3a;border:1px solid #8a4255}
+    .btn.tiny{padding:7px 10px;font-size:12px}
     .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-    .status{padding:10px 12px;margin:10px 0;border:1px solid #263b55;border-radius:12px;color:#dce7fa;overflow-wrap:anywhere}
+    .status{padding:10px 12px;margin:10px 0;border:1px solid #385071;border-radius:9px;color:#dce7fa;overflow-wrap:anywhere}
     .status:empty{display:none}
     .status.error{color:#ffd2d5;border-color:#8a4255;background:#351925}
     .status.success{color:#c7ffe8;border-color:#247c5b;background:#102c25}
-    .profile-row{display:flex;gap:12px;align-items:center;min-width:0}
-    .avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;object-fit:cover;background:#17263c;border:1px solid #263d5b}
-    .avatar.large{width:76px;height:76px;flex-basis:76px}
+    .profile-row{display:flex;gap:13px;align-items:center;min-width:0}
+    .avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;object-fit:cover;background:#233956;border:1px solid #3b5273}
+    .avatar.large{width:75px;height:75px;flex-basis:75px}
     .profile-name{font-weight:800;overflow-wrap:anywhere}
-    .post{padding:17px 19px}
+    .post{margin-bottom:15px}
     .post-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .post-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:13px 0}
-    .post-image{display:block;width:100%;max-height:620px;object-fit:contain;background:#050a12;border:1px solid var(--line);border-radius:16px;margin:13px 0}
+    .post-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0}
+    .post-image{display:block;width:100%;max-height:620px;object-fit:contain;background:#07101e;border:1px solid var(--line);border-radius:12px;margin:14px 0}
     .image-preview-wrap{margin:10px 0 14px}
-    .image-preview{display:block;max-width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:14px;background:#050a12}
+    .image-preview{display:block;max-width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:12px;background:#07101e}
     .post-actions{display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line);padding-top:12px}
     .comment-list{display:grid;gap:8px;margin:12px 0}
-    .comment{background:#070c15;border:1px solid #1b2a40;border-radius:13px;padding:10px;overflow-wrap:anywhere}
+    .comment{background:#0a1424;border:1px solid #21324b;border-radius:10px;padding:10px;overflow-wrap:anywhere}
     .comment-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .comment-form{display:flex;gap:8px;align-items:flex-start;margin-top:10px}
     .comment-form textarea{min-height:43px;margin:0}
-    .notification{padding:13px;border:1px solid var(--line);background:#080e19;border-radius:13px;margin:9px 0}
-    .notification.unread{border-color:var(--blue);background:#0b1b2e}
-    .conversation-list{max-height:390px;min-height:90px;overflow-y:auto;padding:12px;margin:14px 0;border-radius:14px;background:#050a12;border:1px solid var(--line)}
+    .notification{padding:13px;border:1px solid var(--line);background:#0b1525;border-radius:11px;margin:9px 0}
+    .notification.unread{border-color:#3984ff;background:#112342}
+    .conversation-list{max-height:390px;min-height:90px;overflow-y:auto;padding:12px;margin:14px 0;border-radius:12px;background:#091221;border:1px solid var(--line)}
     .message-row{display:flex;margin:9px 0}
     .message-row.mine{justify-content:flex-end}
-    .message-bubble{max-width:82%;padding:10px 13px;border-radius:16px 16px 16px 5px;background:#152236;overflow-wrap:anywhere;white-space:pre-wrap}
-    .message-row.mine .message-bubble{background:#075e9e;border-radius:16px 16px 5px 16px}
+    .message-bubble{max-width:82%;padding:10px 13px;border-radius:14px 14px 14px 4px;background:#192943;overflow-wrap:anywhere;white-space:pre-wrap}
+    .message-row.mine .message-bubble{background:#1e5bc1;border-radius:14px 14px 4px 14px}
     .message-meta{margin-top:5px;color:#c1d2ed;font-size:11px}
     .message-compose{display:flex;gap:9px;align-items:flex-end}
+
+    /* STORIES */
     .stories-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-top:14px}
-    .story-card{position:relative;min-height:155px;padding:15px;border-radius:16px;border:1px solid #263d5b;background:linear-gradient(145deg,#14243b,#080d18);display:flex;flex-direction:column;justify-content:space-between;overflow-wrap:anywhere}
-    .story-card.own{background:linear-gradient(145deg,#073b62,#101a2b);border-color:var(--blue)}
+    .story-card{position:relative;min-height:155px;padding:15px;border-radius:15px;border:1px solid #35517b;background:linear-gradient(145deg,#1a3764,#101a2b);display:flex;flex-direction:column;justify-content:space-between;overflow-wrap:anywhere}
+    .story-card.own{background:linear-gradient(145deg,#193e68,#10233e);border-color:#3984ff}
     .story-top{display:flex;align-items:center;gap:8px;min-width:0}
     .story-top .avatar{width:36px;height:36px;flex-basis:36px}
     .story-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:13px 0;flex:1}
     .story-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
     .story-expiry{font-size:11px;color:#c0d2ef}
     .story-compose-note{font-size:12px;color:var(--muted);margin-top:5px}
-    #feed>.card:first-child{position:sticky;top:63px;z-index:5;background:rgba(5,7,13,.96);backdrop-filter:blur(14px)}
-    #feed>.card:first-child h2{font-size:20px}
-    #postsList>.card{border-bottom:1px solid var(--line)}
-    footer{text-align:center;color:var(--muted);padding:24px 10px;font-size:12px}
-    @media(min-width:760px){
-      body{padding-bottom:0}
-      .topbar-inner{padding:12px 20px}
-      .wrap{margin:0 auto}
-      .hero{padding:14px 20px}
-      .card{padding:19px 22px}
-      .topbar nav{gap:5px}
-    }
-    @media(max-width:759px){
-      .topbar-inner{padding:12px 14px;justify-content:center}
-      .brand{font-size:21px}
-      nav{position:fixed;left:0;right:0;bottom:0;z-index:50;justify-content:flex-start;gap:0;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:rgba(5,7,13,.97);border-top:1px solid var(--line);backdrop-filter:blur(18px);max-width:none}
-      .topbar nav a{min-width:74px;text-align:center;padding:8px 7px;font-size:11px;border-radius:12px}
-      .wrap{margin:0;padding:0 0 24px}
-      .hero{padding:13px 16px}
-      .hero h1{font-size:21px}
-      .card,.post{padding:15px 14px}
-      .post-head{gap:8px}
-      .post-actions{justify-content:space-between}
-      .post-actions .btn{flex:1;min-width:0;padding:8px 7px}
+    footer{text-align:center;color:var(--muted);padding:25px 10px;font-size:12px}
+    @media(max-width:560px){
+      .topbar-inner{align-items:flex-start}
+      nav{width:100%;justify-content:space-between;gap:4px}
+      nav a{flex:1;min-width:36px;height:42px;padding:6px;font-size:21px}
+      .wrap{margin-top:14px;padding:0 10px 30px}
+      .card{padding:14px}
+      .hero{padding:22px 17px}
       .comment-form,.message-compose{flex-direction:column}
       .comment-form .btn,.message-compose .btn{width:100%}
       .message-bubble{max-width:92%}
       .stories-row{grid-template-columns:repeat(2,minmax(0,1fr))}
-      #feed>.card:first-child{top:0}
-      footer{padding-bottom:25px}
-    }
-    @media(max-width:360px){
-      .topbar nav a{min-width:66px;font-size:10px}
-      .brand{font-size:19px}
-      .stories-row{grid-template-columns:1fr}
-      .profile-row{gap:9px}
     }
   </style>
 </head>
@@ -129,14 +116,14 @@
     <div class="topbar-inner">
       <a class="brand" href="#home">KAYB<span>GRAM</span></a>
       <nav aria-label="Main navigation">
-        <a href="#home">Home</a>
-        <a href="#stories">✨ Stories</a>
-        <a href="#myProfile">👤 Profile</a>
-        <a href="#create">✍️ Post</a>
-        <a href="#feed">🏠 Home</a>
-        <a href="#notifications">🔔 Notifications <span id="notificationCount"></span></a>
-        <a href="#messages">💬 Messages</a>
-        <a href="#account">Account</a>
+        <a href="#home" aria-label="Home" title="Home"><span class="nav-icon" aria-hidden="true">⌂</span></a>
+        <a href="#stories" aria-label="Stories" title="Stories"><span class="nav-icon" aria-hidden="true">◉</span></a>
+        <a href="#myProfile" aria-label="My Profile" title="My Profile"><span class="nav-icon" aria-hidden="true">♙</span></a>
+        <a href="#create" aria-label="Create a post" title="Create a post"><span class="nav-icon" aria-hidden="true">＋</span></a>
+        <a href="#feed" aria-label="Community feed" title="Community feed"><span class="nav-icon" aria-hidden="true">♧</span></a>
+        <a href="#notifications" aria-label="Notifications" title="Notifications"><span class="nav-icon" aria-hidden="true">♢</span><span id="notificationCount" class="nav-badge"></span></a>
+        <a href="#messages" aria-label="Messages" title="Messages"><span class="nav-icon" aria-hidden="true">✉</span></a>
+        <a href="#account" aria-label="Account" title="Account"><span class="nav-icon" aria-hidden="true">⚙</span></a>
       </nav>
     </div>
   </header>
@@ -144,10 +131,11 @@
   <main class="wrap" id="home">
     <section class="hero">
       <div class="eyebrow">YOUR PEOPLE. YOUR WORLD.</div>
-      <h1>Your world. Your people.</h1>
-      <p class="muted">Catch up with your community and share what is happening.</p>
+      <h1>A little closer.<br>A lot more connected.</h1>
+      <p class="muted">A fresh home for your social life. Share your world, meet people, and stay connected.</p>
     </section>
 
+    <!-- STORIES -->
     <section class="card" id="stories">
       <div class="post-head">
         <div>
@@ -157,6 +145,7 @@
         <button class="btn secondary tiny" id="refreshStories" type="button">Refresh</button>
       </div>
       <div id="storiesStatus" class="status" role="status"></div>
+
       <div id="storyComposer" class="hidden">
         <form id="storyForm">
           <label for="storyText">Create your Story</label>
@@ -264,8 +253,8 @@
       <div class="card">
         <div class="post-head">
           <div>
-            <h2>Home timeline</h2>
-            <p class="muted small">Posts from your Kaybgram community.</p>
+            <h2>🌎 Community Feed</h2>
+            <p class="muted small">Updates from your Kaybgram community.</p>
           </div>
           <button class="btn secondary tiny" id="refreshFeed" type="button">Refresh feed</button>
         </div>
@@ -283,9 +272,8 @@
 
     const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
-
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const $ = id => document.getElementById(id);
+        const $ = id => document.getElementById(id);
     let currentUser = null;
     let currentProfile = null;
     let selectedMemberName = "";
@@ -305,9 +293,7 @@
       el.className = "status" + (type ? " " + type : "");
     }
 
-    function hideStatus(id) {
-      showStatus(id, "");
-    }
+    function hideStatus(id) { showStatus(id, ""); }
 
     function formatDate(value) {
       if (!value) return "";
@@ -357,11 +343,8 @@
       if (!currentUser || !recipientId || recipientId === currentUser.id) return;
       try {
         const { error } = await client.from("notifications").insert({
-          recipient_id: recipientId,
-          actor_id: currentUser.id,
-          type,
-          post_id: postId,
-          message
+          recipient_id: recipientId, actor_id: currentUser.id, type,
+          post_id: postId, message
         });
         if (error) console.warn("Notification was not saved:", error.message);
       } catch (error) {
@@ -381,8 +364,7 @@
       const { data, error } = await client.from("notifications")
         .select("id,recipient_id,actor_id,type,post_id,message,is_read,created_at")
         .eq("recipient_id", currentUser.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
+        .order("created_at", { ascending: false }).limit(50);
 
       if (error) {
         list.replaceChildren();
@@ -403,8 +385,7 @@
       let profileMap = {};
       if (actorIds.length) {
         const { data: profiles } = await client.from("profiles")
-          .select("user_id,display_name,avatar_url")
-          .in("user_id", actorIds);
+          .select("user_id,display_name,avatar_url").in("user_id", actorIds);
         (profiles || []).forEach(p => profileMap[p.user_id] = p);
       }
 
@@ -422,21 +403,19 @@
       const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
       if (unreadIds.length) {
         const { error: updateError } = await client.from("notifications")
-          .update({ is_read: true })
-          .in("id", unreadIds)
-          .eq("recipient_id", currentUser.id);
+          .update({ is_read: true }).in("id", unreadIds).eq("recipient_id", currentUser.id);
         if (!updateError) {
           notificationUnreadCount = 0;
           $("notificationCount").textContent = "";
         }
       }
     }
-        async function loadMyProfile() {
+
+    async function loadMyProfile() {
       if (!currentUser) return;
       const { data, error } = await client.from("profiles")
         .select("user_id,display_name,bio,avatar_url")
-        .eq("user_id", currentUser.id)
-        .maybeSingle();
+        .eq("user_id", currentUser.id).maybeSingle();
 
       if (error) {
         showStatus("profileStatus", "Could not load profile: " + error.message, "error");
@@ -446,8 +425,7 @@
       currentProfile = data || {
         user_id: currentUser.id,
         display_name: currentUser.email ? currentUser.email.split("@")[0] : "Kaybgram member",
-        bio: "",
-        avatar_url: ""
+        bio: "", avatar_url: ""
       };
 
       $("displayName").value = currentProfile.display_name || "";
@@ -459,10 +437,8 @@
 
     async function saveProfileData(displayName, bio, avatarUrlValue) {
       const profileData = {
-        user_id: currentUser.id,
-        display_name: displayName,
-        bio,
-        avatar_url: avatarUrlValue || ""
+        user_id: currentUser.id, display_name: displayName,
+        bio, avatar_url: avatarUrlValue || ""
       };
       const { error } = await client.from("profiles")
         .upsert(profileData, { onConflict: "user_id" });
@@ -541,12 +517,10 @@
       const button = $("saveProfileBtn");
       button.disabled = true;
       hideStatus("profileStatus");
-
       try {
         const displayName = $("displayName").value.trim();
         const bio = $("bio").value.trim();
         if (!displayName) throw new Error("Please enter a display name.");
-
         const photo = $("profilePhoto").files[0];
         const newAvatarUrl = photo ? await uploadProfilePhoto(photo) : (currentProfile?.avatar_url || "");
         await saveProfileData(displayName, bio, newAvatarUrl);
@@ -561,8 +535,7 @@
         button.disabled = false;
       }
     });
-
-    // STORIES
+        // STORIES: Load active Stories and the authors' profiles.
     async function loadStories() {
       const list = $("storiesList");
       list.replaceChildren(makeElement("p", "muted small", "Loading Stories..."));
@@ -588,7 +561,6 @@
 
       const userIds = [...new Set(stories.map(s => s.user_id).filter(Boolean))];
       let profileMap = {};
-
       if (userIds.length) {
         const { data: profiles, error: profileError } = await client.from("profiles")
           .select("user_id,display_name,bio,avatar_url")
@@ -605,7 +577,6 @@
         const top = makeElement("div", "story-top");
         const avatar = makeElement("img", "avatar");
         setAvatar(avatar, profile);
-
         const nameBox = makeElement("div");
         nameBox.append(
           makeElement("div", "profile-name", own ? "Your Story" : usernameFor(profile)),
@@ -625,10 +596,7 @@
             if (!confirm("Delete this Story?")) return;
             deleteButton.disabled = true;
             const { error: deleteError } = await client.from("stories")
-              .delete()
-              .eq("id", story.id)
-              .eq("user_id", currentUser.id);
-
+              .delete().eq("id", story.id).eq("user_id", currentUser.id);
             if (deleteError) {
               showStatus("storiesStatus", "Could not delete Story: " + deleteError.message, "error");
               deleteButton.disabled = false;
@@ -660,8 +628,8 @@
       const button = $("publishStoryBtn");
       button.disabled = true;
       hideStatus("storiesStatus");
-
       try {
+        // Supabase supplies created_at and expires_at defaults.
         const { error } = await client.from("stories").insert({
           user_id: currentUser.id,
           content
@@ -680,15 +648,15 @@
     });
 
     $("refreshStories").addEventListener("click", loadStories);
-        async function loadPosts() {
+
+    async function loadPosts() {
       const list = $("postsList");
       list.replaceChildren(makeElement("div", "card", "Loading community posts..."));
       hideStatus("feedStatus");
 
       const { data: posts, error } = await client.from("posts")
         .select("id,user_id,content,image_url,created_at")
-        .order("created_at", { ascending: false })
-        .limit(50);
+        .order("created_at", { ascending: false }).limit(50);
 
       if (error) {
         list.replaceChildren();
@@ -707,14 +675,10 @@
       const profilePromise = userIds.length
         ? client.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id", userIds)
         : Promise.resolve({ data: [] });
-
       const likesPromise = client.from("likes").select("post_id,user_id").in("post_id", postIds);
-
       const commentsPromise = client.from("comments")
-        .select("id,post_id,user_id,content,created_at")
-        .in("post_id", postIds)
+        .select("id,post_id,user_id,content,created_at").in("post_id", postIds)
         .order("created_at", { ascending: true });
-
       const followsPromise = currentUser
         ? client.from("follows").select("follower_id,following_id").eq("follower_id", currentUser.id)
         : Promise.resolve({ data: [] });
@@ -737,8 +701,7 @@
       list.replaceChildren();
 
       posts.forEach(post => list.append(createPostCard(
-        post,
-        profileMap[post.user_id],
+        post, profileMap[post.user_id],
         likes.filter(l => l.post_id === post.id),
         comments.filter(c => c.post_id === post.id),
         follows.some(f => f.following_id === post.user_id)
@@ -751,42 +714,32 @@
       const identity = makeElement("div", "profile-row");
       const avatar = makeElement("img", "avatar");
       setAvatar(avatar, profile);
-
       const nameBox = makeElement("div");
       nameBox.append(
         makeElement("div", "profile-name", usernameFor(profile)),
         makeElement("div", "small muted", formatDate(post.created_at))
       );
-
       identity.append(avatar, nameBox);
       head.append(identity);
 
       const controls = makeElement("div", "actions");
-
       if (currentUser && currentUser.id !== post.user_id) {
         const followBtn = makeElement("button", "btn secondary tiny", isFollowing ? "Unfollow" : "Follow");
         followBtn.type = "button";
-
         followBtn.addEventListener("click", async () => {
           followBtn.disabled = true;
           try {
             if (isFollowing) {
               const { error } = await client.from("follows").delete()
-                .eq("follower_id", currentUser.id)
-                .eq("following_id", post.user_id);
+                .eq("follower_id", currentUser.id).eq("following_id", post.user_id);
               if (error) throw error;
             } else {
               const { error } = await client.from("follows").insert({
-                follower_id: currentUser.id,
-                following_id: post.user_id
+                follower_id: currentUser.id, following_id: post.user_id
               });
               if (error) throw error;
-
-              await createNotification(
-                post.user_id,
-                "follow",
-                usernameFor(currentProfile, currentUser.email) + " started following you."
-              );
+              await createNotification(post.user_id, "follow",
+                usernameFor(currentProfile, currentUser.email) + " started following you.");
             }
             await loadPosts();
           } catch (error) {
@@ -794,38 +747,28 @@
             followBtn.disabled = false;
           }
         });
-
         controls.append(followBtn);
       }
 
       if (currentUser && currentUser.id === post.user_id) {
         const deleteBtn = makeElement("button", "btn danger tiny", "Delete post");
         deleteBtn.type = "button";
-
         deleteBtn.addEventListener("click", async () => {
           if (!confirm("Delete this post?")) return;
           deleteBtn.disabled = true;
-
           const { error } = await client.from("posts").delete()
-            .eq("id", post.id)
-            .eq("user_id", currentUser.id);
-
+            .eq("id", post.id).eq("user_id", currentUser.id);
           if (error) {
             showStatus("feedStatus", "Could not delete post: " + error.message, "error");
             deleteBtn.disabled = false;
-          } else {
-            await loadPosts();
-          }
+          } else await loadPosts();
         });
-
         controls.append(deleteBtn);
       }
-
       head.append(controls);
 
       const content = makeElement("div", "post-content", post.content || "");
       if (!post.content) content.style.display = "none";
-
       let postImage = null;
       if (post.image_url) {
         postImage = makeElement("img", "post-image");
@@ -838,37 +781,26 @@
           postImage.style.display = "none";
         };
       }
-
       const actions = makeElement("div", "post-actions");
       const userLiked = !!(currentUser && postLikes.some(l => l.user_id === currentUser.id));
-
       const likeBtn = makeElement("button", "btn secondary tiny",
         (userLiked ? "♥ Unlike" : "♡ Like") + " (" + postLikes.length + ")");
       likeBtn.type = "button";
-
       likeBtn.addEventListener("click", async () => {
         if (!currentUser) return showStatus("feedStatus", "Sign in to like posts.", "error");
         likeBtn.disabled = true;
-
         try {
           if (userLiked) {
             const { error } = await client.from("likes").delete()
-              .eq("post_id", post.id)
-              .eq("user_id", currentUser.id);
+              .eq("post_id", post.id).eq("user_id", currentUser.id);
             if (error) throw error;
           } else {
             const { error } = await client.from("likes").insert({
-              post_id: post.id,
-              user_id: currentUser.id
+              post_id: post.id, user_id: currentUser.id
             });
             if (error) throw error;
-
-            await createNotification(
-              post.user_id,
-              "like",
-              usernameFor(currentProfile, currentUser.email) + " liked your post.",
-              post.id
-            );
+            await createNotification(post.user_id, "like",
+              usernameFor(currentProfile, currentUser.email) + " liked your post.", post.id);
           }
           await loadPosts();
         } catch (error) {
@@ -876,13 +808,10 @@
           likeBtn.disabled = false;
         }
       });
-
-      const commentToggle = makeElement("button", "btn secondary tiny", "Comments (" + postComments.length + ")");
+            const commentToggle = makeElement("button", "btn secondary tiny", "Comments (" + postComments.length + ")");
       commentToggle.type = "button";
-
       const shareBtn = makeElement("button", "btn secondary tiny", "Share");
       shareBtn.type = "button";
-
       shareBtn.addEventListener("click", async () => {
         const shareText = usernameFor(profile) + " on Kaybgram: " + (post.content || "");
         try {
@@ -891,14 +820,11 @@
           } else if (navigator.clipboard) {
             await navigator.clipboard.writeText(shareText + "\n" + location.href);
             showStatus("feedStatus", "Post text copied. You can share it now.", "success");
-          } else {
-            prompt("Copy this post to share:", shareText);
-          }
+          } else prompt("Copy this post to share:", shareText);
         } catch (error) {
           if (error.name !== "AbortError") showStatus("feedStatus", "Could not share this post.", "error");
         }
       });
-
       actions.append(likeBtn, commentToggle, shareBtn);
 
       const commentsArea = makeElement("div", "hidden");
@@ -911,31 +837,22 @@
         postComments.forEach(comment => {
           const item = makeElement("div", "comment");
           const top = makeElement("div", "comment-top");
-
           top.append(
             makeElement("span", "profile-name", "Kaybgram member"),
             makeElement("span", "small muted", formatDate(comment.created_at))
           );
-
           item.append(top, makeElement("div", "", comment.content || ""));
 
           if (currentUser && comment.user_id === currentUser.id) {
             const deleteComment = makeElement("button", "btn danger tiny", "Delete comment");
             deleteComment.type = "button";
             deleteComment.style.marginTop = "7px";
-
             deleteComment.addEventListener("click", async () => {
               const { error } = await client.from("comments").delete()
-                .eq("id", comment.id)
-                .eq("user_id", currentUser.id);
-
-              if (error) {
-                showStatus("feedStatus", "Could not delete comment: " + error.message, "error");
-              } else {
-                await loadPosts();
-              }
+                .eq("id", comment.id).eq("user_id", currentUser.id);
+              if (error) showStatus("feedStatus", "Could not delete comment: " + error.message, "error");
+              else await loadPosts();
             });
-
             item.append(deleteComment);
           }
           commentsList.append(item);
@@ -948,7 +865,6 @@
       commentInput.placeholder = "Write a comment...";
       commentInput.setAttribute("aria-label", "Write a comment");
       commentInput.required = true;
-
       const commentSubmit = makeElement("button", "btn", "Comment");
       commentSubmit.type = "submit";
       commentForm.append(commentInput, commentSubmit);
@@ -956,26 +872,16 @@
       commentForm.addEventListener("submit", async event => {
         event.preventDefault();
         if (!currentUser) return showStatus("feedStatus", "Sign in to comment.", "error");
-
         const text = commentInput.value.trim();
         if (!text) return;
         commentSubmit.disabled = true;
-
         try {
           const { error } = await client.from("comments").insert({
-            post_id: post.id,
-            user_id: currentUser.id,
-            content: text
+            post_id: post.id, user_id: currentUser.id, content: text
           });
           if (error) throw error;
-
-          await createNotification(
-            post.user_id,
-            "comment",
-            usernameFor(currentProfile, currentUser.email) + " commented on your post.",
-            post.id
-          );
-
+          await createNotification(post.user_id, "comment",
+            usernameFor(currentProfile, currentUser.email) + " commented on your post.", post.id);
           await loadPosts();
         } catch (error) {
           showStatus("feedStatus", "Could not add comment: " + error.message, "error");
@@ -984,25 +890,20 @@
       });
 
       commentsArea.append(commentsList);
-      if (currentUser) {
-        commentsArea.append(commentForm);
-      } else {
-        commentsArea.append(makeElement("p", "muted small", "Sign in to leave a comment."));
-      }
-
+      if (currentUser) commentsArea.append(commentForm);
+      else commentsArea.append(makeElement("p", "muted small", "Sign in to leave a comment."));
       card.append(head, content);
       if (postImage) card.append(postImage);
       card.append(actions, commentsArea);
       return card;
     }
-        $("authForm").addEventListener("submit", async event => {
+
+    $("authForm").addEventListener("submit", async event => {
       event.preventDefault();
       const email = $("authEmail").value.trim();
       const password = $("authPassword").value;
-
       $("signInBtn").disabled = true;
       hideStatus("authStatus");
-
       try {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -1017,29 +918,21 @@
     $("signUpBtn").addEventListener("click", async () => {
       const email = $("authEmail").value.trim();
       const password = $("authPassword").value;
-
       if (!email || !password) {
         showStatus("authStatus", "Enter your email and password first, then tap Create account.", "error");
         return;
       }
-
       if (password.length < 6) {
         showStatus("authStatus", "Your password must be at least 6 characters.", "error");
         return;
       }
-
       $("signUpBtn").disabled = true;
       hideStatus("authStatus");
-
       try {
         const { data, error } = await client.auth.signUp({ email, password });
         if (error) throw error;
-
-        if (data.session) {
-          showStatus("authStatus", "Account created. You are signed in.", "success");
-        } else {
-          showStatus("authStatus", "Account created. Check your email to confirm it, then sign in.", "success");
-        }
+        if (data.session) showStatus("authStatus", "Account created. You are signed in.", "success");
+        else showStatus("authStatus", "Account created. Check your email to confirm it, then sign in.", "success");
       } catch (error) {
         showStatus("authStatus", "Could not create account: " + error.message, "error");
       } finally {
@@ -1049,10 +942,8 @@
 
     $("signOutBtn").addEventListener("click", async () => {
       const { error } = await client.auth.signOut();
-
-      if (error) {
-        showStatus("authStatus", "Could not sign out: " + error.message, "error");
-      } else {
+      if (error) showStatus("authStatus", "Could not sign out: " + error.message, "error");
+      else {
         showStatus("authStatus", "You have signed out.", "success");
         $("messages").classList.add("hidden");
         $("notifications").classList.add("hidden");
@@ -1071,27 +962,22 @@
     $("postPhoto").addEventListener("change", () => {
       const file = $("postPhoto").files[0];
       hideStatus("postStatus");
-
       if (!file) {
         clearPostPhotoPreview();
         return;
       }
-
       if (!file.type.startsWith("image/")) {
         clearPostPhotoPreview();
         showStatus("postStatus", "Please choose an image file.", "error");
         return;
       }
-
       if (file.size > 5 * 1024 * 1024) {
         clearPostPhotoPreview();
         showStatus("postStatus", "Your post photo must be 5 MB or smaller.", "error");
         return;
       }
-
       const preview = $("postPhotoPreview");
       if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
-
       const objectUrl = URL.createObjectURL(file);
       preview.src = objectUrl;
       preview.dataset.objectUrl = objectUrl;
@@ -1108,17 +994,12 @@
       const extensionFromName = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
       const extension = extensionFromName || (file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : file.type === "image/gif" ? "gif" : "jpg");
       const path = currentUser.id + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 10) + "." + extension;
-
       const { error } = await client.storage.from("post-photos").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type
+        cacheControl: "3600", upsert: false, contentType: file.type
       });
-
       if (error) {
         throw new Error("Photo upload failed. Check the post-photos bucket and its upload policy. " + error.message);
       }
-
       const { data } = client.storage.from("post-photos").getPublicUrl(path);
       return data.publicUrl;
     }
@@ -1126,15 +1007,12 @@
     $("postForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!currentUser) return showStatus("postStatus", "Please sign in first.", "error");
-
       const content = $("caption").value.trim();
       const photo = $("postPhoto").files[0] || null;
-
       if (!content && !photo) {
         showStatus("postStatus", "Write a caption or choose a photo before publishing.", "error");
         return;
       }
-
       if (photo && (!photo.type.startsWith("image/") || photo.size > 5 * 1024 * 1024)) {
         showStatus("postStatus", "Choose an image file that is 5 MB or smaller.", "error");
         return;
@@ -1143,22 +1021,16 @@
       const button = $("publishBtn");
       button.disabled = true;
       hideStatus("postStatus");
-
       try {
         let imageUrl = null;
-
         if (photo) {
           showStatus("postStatus", "Uploading your photo... please wait.");
           imageUrl = await uploadPostPhoto(photo);
         }
-
         const { error } = await client.from("posts").insert({
-          user_id: currentUser.id,
-          content,
-          image_url: imageUrl
+          user_id: currentUser.id, content, image_url: imageUrl
         });
         if (error) throw error;
-
         $("caption").value = "";
         clearPostPhotoPreview();
         showStatus("postStatus", "Your post has been published.", "success");
@@ -1169,8 +1041,7 @@
         button.disabled = false;
       }
     });
-
-    // PRIVATE MESSAGES
+        // PRIVATE MESSAGES
     async function loadMembers() {
       if (!currentUser) {
         showStatus("messagesStatus", "Please sign in to send private messages.", "error");
@@ -1183,8 +1054,7 @@
       hideStatus("messagesStatus");
 
       const { data, error } = await client.from("profiles")
-        .select("user_id,display_name,bio,avatar_url")
-        .order("display_name", { ascending: true });
+        .select("user_id,display_name,bio,avatar_url").order("display_name", { ascending: true });
 
       if (error) {
         select.replaceChildren(makeElement("option", "", "Could not load members"));
@@ -1194,7 +1064,6 @@
 
       const members = (data || []).filter(p => p.user_id && p.user_id !== currentUser.id);
       select.replaceChildren();
-
       if (!members.length) {
         select.append(makeElement("option", "", "No other members yet"));
         select.value = "";
@@ -1203,7 +1072,6 @@
       }
 
       select.append(makeElement("option", "", "Choose a member..."));
-
       members.forEach(member => {
         const option = makeElement("option", "", usernameFor(member));
         option.value = member.user_id;
@@ -1211,7 +1079,6 @@
       });
 
       if (oldSelection && members.some(m => m.user_id === oldSelection)) select.value = oldSelection;
-
       if (select.value) {
         selectedMemberName = usernameFor(members.find(m => m.user_id === select.value));
         await loadConversation();
@@ -1222,10 +1089,8 @@
 
     async function loadConversation() {
       if (!currentUser) return;
-
       const recipientId = $("messageMember").value;
       const conversation = $("conversation");
-
       if (!recipientId) {
         conversation.replaceChildren(makeElement("p", "muted small", "Choose a member to view your conversation."));
         return;
@@ -1238,14 +1103,9 @@
 
       const [sentResult, receivedResult] = await Promise.all([
         client.from("messages").select("id,sender_id,recipient_id,content,created_at,read_at")
-          .eq("sender_id", currentUser.id)
-          .eq("recipient_id", recipientId)
-          .order("created_at", { ascending: true }),
-
+          .eq("sender_id", currentUser.id).eq("recipient_id", recipientId).order("created_at", { ascending: true }),
         client.from("messages").select("id,sender_id,recipient_id,content,created_at,read_at")
-          .eq("sender_id", recipientId)
-          .eq("recipient_id", currentUser.id)
-          .order("created_at", { ascending: true })
+          .eq("sender_id", recipientId).eq("recipient_id", currentUser.id).order("created_at", { ascending: true })
       ]);
 
       if (sentResult.error || receivedResult.error) {
@@ -1259,7 +1119,6 @@
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
       conversation.replaceChildren();
-
       if (!messages.length) {
         conversation.append(makeElement("p", "muted small", "No messages yet. Say hello to " + selectedMemberName + "!"));
       } else {
@@ -1267,30 +1126,21 @@
           const mine = message.sender_id === currentUser.id;
           const row = makeElement("div", "message-row" + (mine ? " mine" : ""));
           const bubble = makeElement("div", "message-bubble");
-
           bubble.append(
             makeElement("div", "", message.content || ""),
             makeElement("div", "message-meta", (mine ? "You" : selectedMemberName) + " · " + formatDate(message.created_at))
           );
-
           row.append(bubble);
           conversation.append(row);
         });
       }
 
-      const unreadIds = messages
-        .filter(m => m.recipient_id === currentUser.id && !m.read_at)
-        .map(m => m.id);
-
+      const unreadIds = messages.filter(m => m.recipient_id === currentUser.id && !m.read_at).map(m => m.id);
       if (unreadIds.length) {
-        const { error } = await client.from("messages")
-          .update({ read_at: new Date().toISOString() })
-          .in("id", unreadIds)
-          .eq("recipient_id", currentUser.id);
-
+        const { error } = await client.from("messages").update({ read_at: new Date().toISOString() })
+          .in("id", unreadIds).eq("recipient_id", currentUser.id);
         if (error) console.warn("Could not mark messages as read:", error.message);
       }
-
       conversation.scrollTop = conversation.scrollHeight;
     }
 
@@ -1304,22 +1154,17 @@
 
       const recipientId = $("messageMember").value;
       const content = $("messageText").value.trim();
-
       if (!recipientId) return showStatus("messagesStatus", "Choose a member before sending a message.", "error");
       if (!content) return;
 
       const button = $("sendMessageBtn");
       button.disabled = true;
       hideStatus("messagesStatus");
-
       try {
         const { error } = await client.from("messages").insert({
-          sender_id: currentUser.id,
-          recipient_id: recipientId,
-          content
+          sender_id: currentUser.id, recipient_id: recipientId, content
         });
         if (error) throw error;
-
         $("messageText").value = "";
         showStatus("messagesStatus", "Message sent.", "success");
         await loadConversation();
@@ -1329,43 +1174,31 @@
         button.disabled = false;
       }
     });
-        $("refreshFeed").addEventListener("click", loadPosts);
+
+    $("refreshFeed").addEventListener("click", loadPosts);
     $("refreshNotifications").addEventListener("click", loadNotifications);
 
-    // Navigation: show one section at a time.
+    // Navigation: show one main section at a time instead of stacking everything.
     const pageSections = ["stories", "account", "myProfile", "create", "notifications", "messages", "feed"];
     const heroSection = document.querySelector("main.wrap > .hero");
 
     function showPage(pageId) {
       const page = pageId === "home" ? "home" : pageId;
-
       pageSections.forEach(id => {
         const section = $(id);
-        const visibleOnHome = page === "home" &&
-          (id === "feed" || (id === "create" && !!currentUser));
-
-        if (section) {
-          section.classList.toggle("hidden", id !== page && !visibleOnHome);
-        }
+        if (section) section.classList.toggle("hidden", id !== page && !(page === "home" && id === "feed"));
       });
-
       if (heroSection) heroSection.classList.toggle("hidden", page !== "home");
-
       window.scrollTo({ top: 0, behavior: "smooth" });
-
       document.querySelectorAll('nav a[href^="#"]').forEach(link => {
         const linkPage = link.getAttribute("href").slice(1);
-        link.setAttribute(
-          "aria-current",
-          (linkPage === page || (page === "home" && linkPage === "home")) ? "page" : "false"
-        );
+        link.setAttribute("aria-current", (linkPage === page || (page === "home" && linkPage === "home")) ? "page" : "false");
       });
     }
 
     document.querySelectorAll('nav a[href^="#"]').forEach(link => {
       link.addEventListener("click", async event => {
         event.preventDefault();
-
         const targetId = link.getAttribute("href").slice(1);
         if (!["home", ...pageSections].includes(targetId)) return;
 
@@ -1376,7 +1209,6 @@
         }
 
         showPage(targetId);
-
         if (targetId === "notifications") await loadNotifications();
         if (targetId === "messages") await loadMembers();
         if (targetId === "stories") await loadStories();
@@ -1388,19 +1220,15 @@
     async function startKaybgram() {
       const { data, error } = await client.auth.getSession();
       if (error) console.warn("Session check:", error.message);
-
       currentUser = data?.session?.user || null;
       updateAuthUI();
-
       if (currentUser) await loadMyProfile();
-
       await Promise.all([loadPosts(), loadStories()]);
     }
 
     client.auth.onAuthStateChange(async (_event, session) => {
       currentUser = session?.user || null;
       updateAuthUI();
-
       if (currentUser) {
         await loadMyProfile();
         await Promise.all([loadPosts(), loadStories()]);
@@ -1409,9 +1237,7 @@
         $("myDisplayName").textContent = "Your profile";
         $("myBioPreview").textContent = "Sign in to edit your profile.";
         $("myAvatar").src = "https://placehold.co/100x100/14223a/ffffff?text=K";
-        $("postsList").replaceChildren(
-          makeElement("div", "card muted", "Sign in to publish posts, like, comment, and follow members.")
-        );
+        $("postsList").replaceChildren(makeElement("div", "card muted", "Sign in to publish posts, like, comment, and follow members."));
         await Promise.all([loadPosts(), loadStories()]);
       }
     });
