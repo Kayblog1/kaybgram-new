@@ -4,362 +4,751 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1877f2">
-  <meta name="description" content="Kaybgram helps you connect with friends, share moments and build community.">
-  <title>Kaybgram - Connect with Everyone</title>
-
+  <meta name="theme-color" content="#ffffff">
+  <title>Kaybgram - Connect Your World</title>
+  <meta name="description" content="Join Kaybgram and connect with your community.">
   <style>
+    :root {
+      --blue: #1877f2;
+      --dark: #172033;
+      --muted: #657087;
+      --line: #e5eaf2;
+      --background: #f4f7fb;
+      --white: #ffffff;
+    }
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      color: #1c1e21;
-      line-height: 1.5;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background);
+      color: var(--dark);
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     header {
-      background: #ffffff;
-      padding: 14px 6%;
+      background: white;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav {
+      max-width: 1100px;
+      margin: auto;
+      padding: 15px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 15px;
-      flex-wrap: wrap;
-      box-shadow: 0 2px 8px #00000010;
     }
 
     .logo {
-      color: #1877f2;
-      font-size: 30px;
-      font-weight: bold;
-      text-decoration: none;
+      font-size: 27px;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: -1px;
     }
 
-    .header-actions {
+    .nav-actions {
       display: flex;
-      gap: 10px;
+      gap: 9px;
       align-items: center;
     }
 
-    .button {
-      display: inline-block;
-      padding: 11px 18px;
-      border-radius: 8px;
-      border: none;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .blue {
-      background: #1877f2;
-      color: #ffffff;
-    }
-
-    .light {
-      background: #e7f0ff;
-      color: #1877f2;
+    .container {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 18px;
     }
 
     .hero {
-      max-width: 1100px;
-      margin: 45px auto;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      align-items: center;
-      gap: 45px;
+      background: linear-gradient(135deg, #e8f2ff, #ffffff);
+      border: 1px solid #dceaff;
+      border-radius: 22px;
+      padding: 35px 28px;
+      margin-bottom: 25px;
     }
 
     .hero h1 {
-      color: #1877f2;
-      font-size: clamp(36px, 5vw, 58px);
-      line-height: 1.12;
-      margin-bottom: 20px;
+      margin: 0 0 12px;
+      font-size: clamp(29px, 5vw, 43px);
+      line-height: 1.15;
     }
 
     .hero p {
-      color: #606770;
-      font-size: 19px;
-      margin-bottom: 25px;
-      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 600px;
+      margin-bottom: 0;
     }
 
-    .hero-buttons {
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 285px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 12px rgba(24, 40, 70, 0.035);
+    }
+
+    h2 {
+      font-size: 21px;
+      margin: 0 0 16px;
+    }
+
+    h3 {
+      font-size: 17px;
+      margin: 0 0 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .field {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #d9e0eb;
+      border-radius: 10px;
+      margin: 7px 0 12px;
+      background: white;
+      color: var(--dark);
+    }
+
+    .field:focus {
+      outline: 2px solid #c7ddff;
+      border-color: var(--blue);
+    }
+
+    textarea.field {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 17px;
+      font-weight: 700;
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn:hover {
+      filter: brightness(0.96);
+    }
+
+    .btn-secondary {
+      background: #eaf2ff;
+      color: var(--blue);
+    }
+
+    .btn-light {
+      background: #f0f3f8;
+      color: var(--dark);
+    }
+
+    .btn-small {
+      padding: 9px 12px;
+      font-size: 14px;
+    }
+
+    .full {
+      width: 100%;
+    }
+
+    .button-row {
       display: flex;
-      gap: 12px;
+      gap: 9px;
       flex-wrap: wrap;
     }
 
-    .preview {
-      background: #ffffff;
-      padding: 22px;
-      border-radius: 18px;
-      box-shadow: 0 8px 30px #00000012;
+    .hidden {
+      display: none !important;
     }
 
-    .preview h2 {
-      color: #1877f2;
-      margin-bottom: 16px;
+    .status {
+      padding: 11px 13px;
+      border-radius: 10px;
+      background: #eef5ff;
+      color: #174b91;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
     }
 
-    .sample-post {
-      border: 1px solid #e4e6eb;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 14px;
+    .post {
+      border-bottom: 1px solid var(--line);
+      padding: 18px 0;
     }
 
-    .person {
+    .post:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .post:first-child {
+      padding-top: 0;
+    }
+
+    .post-top {
       display: flex;
+      gap: 11px;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .avatar {
       width: 42px;
       height: 42px;
-      background: #dbeafe;
-      color: #1877f2;
       border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: #e7f0ff;
+      color: var(--blue);
+      font-weight: 800;
       font-size: 18px;
     }
 
-    .muted {
-      color: #65676b;
-      font-size: 13px;
+    .post-name {
+      font-weight: 700;
     }
 
-    .post-text {
-      margin: 10px 0;
+    .post-date {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
     }
 
-    .post-actions {
-      display: flex;
-      justify-content: space-around;
-      padding-top: 10px;
-      border-top: 1px solid #e4e6eb;
-      color: #1877f2;
-      font-weight: bold;
-      font-size: 14px;
+    .post-content {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.65;
+      margin: 12px 0;
     }
 
-    .features {
-      background: #ffffff;
-      padding: 45px 6%;
+    .empty {
+      color: var(--muted);
       text-align: center;
-    }
-
-    .features h2 {
-      color: #1877f2;
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
-
-    .features-intro {
-      color: #65676b;
-      margin-bottom: 30px;
-    }
-
-    .feature-grid {
-      max-width: 1100px;
-      margin: auto;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      padding: 25px 8px;
+      line-height: 1.6;
     }
 
     .feature {
-      background: #f0f6ff;
-      border-radius: 12px;
-      padding: 25px 18px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
     }
 
-    .feature .emoji {
-      font-size: 34px;
-      margin-bottom: 10px;
-    }
-
-    .feature h3 {
-      margin-bottom: 8px;
-    }
-
-    .feature p {
-      color: #65676b;
-      font-size: 14px;
+    .feature:last-child {
+      border-bottom: 0;
     }
 
     footer {
-      padding: 25px 15px;
       text-align: center;
-      color: #65676b;
+      padding: 28px 15px;
+      color: var(--muted);
       font-size: 13px;
     }
 
-    @media (max-width: 700px) {
-      header {
-        padding: 12px 4%;
+    @media (max-width: 760px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        padding: 13px 14px;
       }
 
       .logo {
-        font-size: 26px;
+        font-size: 23px;
       }
 
-      .button {
-        padding: 10px 12px;
-        font-size: 14px;
+      .container {
+        margin-top: 17px;
+        padding: 0 12px;
       }
 
       .hero {
-        grid-template-columns: 1fr;
-        gap: 30px;
-        margin: 25px auto;
+        padding: 26px 20px;
       }
 
-      .hero p {
-        font-size: 17px;
-      }
-
-      .feature-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .features {
-        padding: 35px 20px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      header {
-        align-items: flex-start;
-        flex-direction: column;
+      .card {
+        padding: 18px;
       }
     }
   </style>
 </head>
-
 <body>
 
-  <header>
-    <a class="logo" href="index.html">Kaybgram</a>
-
-    <div class="header-actions">
-      <a class="button light" href="#about">Explore</a>
-      <a class="button blue" href="#join">Join Kaybgram</a>
+<header>
+  <div class="nav">
+    <div class="logo">Kaybgram</div>
+    <div class="nav-actions">
+      <span id="navUser" class="muted hidden"></span>
+      <button id="navSignIn" class="btn btn-secondary btn-small"
+        type="button" onclick="showAuth()">Sign in</button>
+      <button id="navSignOut" class="btn btn-light btn-small hidden"
+        type="button" onclick="signOut()">Sign out</button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <section class="hero" id="about">
+<main class="container">
+  <section class="hero">
+    <h1>A little closer.<br>A lot more connected.</h1>
+    <p>
+      Welcome to Kaybgram — a fresh place to share your thoughts,
+      meet people and connect with your community.
+    </p>
+    <div class="button-row" style="margin-top:20px">
+      <button class="btn" type="button" onclick="showAuth()">
+        Join Kaybgram
+      </button>
+      <button class="btn btn-secondary" type="button"
+        onclick="document.getElementById('feed').scrollIntoView({behavior:'smooth'})">
+        Explore the feed
+      </button>
+    </div>
+  </section>
 
-      <div>
-        <h1>Bring your world closer.</h1>
-
-        <p>
-          Meet new people, share your favourite moments,
-          discover communities and stay connected with
-          the people who matter to you.
+  <div class="layout">
+    <section>
+      <div id="authCard" class="card">
+        <h2 id="authTitle">Welcome to Kaybgram</h2>
+        <p class="muted" id="authDescription">
+          Sign in to your account or create a new one.
         </p>
 
-        <div class="hero-buttons" id="join">
-          <a class="button blue" href="#features">
-            Discover Kaybgram
-          </a>
+        <form id="authForm">
+          <label for="email">Email address</label>
+          <input class="field" id="email" type="email"
+            autocomplete="email" placeholder="you@example.com" required>
 
-          <a class="button light" href="#features">
-            Learn more
-          </a>
-        </div>
+          <label for="password">Password</label>
+          <input class="field" id="password" type="password"
+            autocomplete="current-password" minlength="6"
+            placeholder="At least 6 characters" required>
+
+          <div class="button-row">
+            <button class="btn" id="signInButton" type="submit">
+              Sign in
+            </button>
+            <button class="btn btn-secondary" id="signUpButton"
+              type="button" onclick="signUp()">
+              Create account
+            </button>
+          </div>
+        </form>
+        <div id="authMessage" class="status hidden" role="status"></div>
       </div>
 
-      <div class="preview">
-        <h2>Your community, together</h2>
-
-        <div class="sample-post">
-          <div class="person">
-            <div class="avatar">K</div>
-            <div>
-              <strong>Kaybgram Community</strong>
-              <div class="muted">Welcome to a new beginning</div>
-            </div>
-          </div>
-
-          <p class="post-text">
-            Every great connection starts somewhere.
-            Welcome to Kaybgram! 💙
-          </p>
-
-          <div class="post-actions">
-            <span>♡ Like</span>
-            <span>Comment</span>
-            <span>Share</span>
-          </div>
-        </div>
-
-        <div class="sample-post">
-          <div class="person">
-            <div class="avatar">F</div>
-            <div>
-              <strong>Friends and Family</strong>
-              <div class="muted">Your people, your world</div>
-            </div>
-          </div>
-
-          <p class="post-text">
-            Share a moment, start a conversation,
-            and make every connection count.
-          </p>
-        </div>
+      <div id="welcomeCard" class="card hidden">
+        <h2>You're signed in! 💙</h2>
+        <p class="muted" id="welcomeText">
+          Welcome to your Kaybgram community.
+        </p>
+        <button class="btn btn-light btn-small" type="button"
+          onclick="signOut()">Sign out</button>
       </div>
 
-    </section>
+      <div id="composer" class="card hidden">
+        <h2>Create a post</h2>
+        <p class="muted">What's happening in your world?</p>
+        <form id="postForm">
+          <textarea id="postContent" class="field" maxlength="2000"
+            placeholder="Share something with your community..."
+            aria-label="Write your post" required></textarea>
+          <div class="button-row">
+            <button class="btn" id="publishButton" type="submit">
+              Publish post
+            </button>
+          </div>
+        </form>
+        <div id="postMessage" class="status hidden" role="status"></div>
+      </div>
 
-    <section class="features" id="features">
-      <h2>Everything starts with connection</h2>
-
-      <p class="features-intro">
-        A fresh space to express yourself and connect.
-      </p>
-
-      <div class="feature-grid">
-
-        <div class="feature">
-          <div class="emoji">👥</div>
-          <h3>Find Your People</h3>
-          <p>Connect with friends and meet people who share your interests.</p>
+      <div id="feed" class="card">
+        <h2>Kaybgram feed</h2>
+        <p class="muted">See what's happening in your community.</p>
+        <div id="postsList">
+          <div class="empty">Loading posts...</div>
         </div>
-
-        <div class="feature">
-          <div class="emoji">📸</div>
-          <h3>Share Your Moments</h3>
-          <p>Give your stories, ideas and special moments a place to shine.</p>
-        </div>
-
-        <div class="feature">
-          <div class="emoji">💬</div>
-          <h3>Start Conversations</h3>
-          <p>Discover new perspectives and build meaningful connections.</p>
-        </div>
-
+        <button id="loadMoreButton" class="btn btn-secondary full hidden"
+          type="button" onclick="loadPosts()">Refresh feed</button>
       </div>
     </section>
-  </main>
 
-  <footer>
-    © 2026 Kaybgram. Connect with care.
-  </footer>
+    <aside>
+      <div class="card">
+        <h2>Welcome to Kaybgram</h2>
+        <p class="muted">
+          Your people. Your world. A place to share and connect.
+        </p>
+        <div class="feature">
+          <h3>💬 Share your thoughts</h3>
+          <p class="muted">Publish posts for the community.</p>
+        </div>
+        <div class="feature">
+          <h3>🌍 Meet your community</h3>
+          <p class="muted">Discover what other members are sharing.</p>
+        </div>
+        <div class="feature">
+          <h3>🔒 Your account</h3>
+          <p class="muted">Sign in to publish posts under your account.</p>
+        </div>
+      </div>
 
+      <div class="card">
+        <h3>Getting started</h3>
+        <p class="muted">
+          Create an account with your email address. If email confirmation
+          is enabled, check your inbox before signing in.
+        </p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  Kaybgram · Connect with care. © 2026
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // This website uses the NEW Kaybgram Supabase project.
+  const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  let currentUser = null;
+  let loadingPosts = false;
+
+  const authCard = document.getElementById("authCard");
+  const welcomeCard = document.getElementById("welcomeCard");
+  const composer = document.getElementById("composer");
+  const authMessage = document.getElementById("authMessage");
+  const postMessage = document.getElementById("postMessage");
+
+  function showMessage(element, message) {
+    element.textContent = message;
+    element.classList.remove("hidden");
+  }
+
+  function hideMessage(element) {
+    element.textContent = "";
+    element.classList.add("hidden");
+  }
+
+  function showAuth() {
+    authCard.classList.remove("hidden");
+    authCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function updateInterface(user) {
+    currentUser = user || null;
+
+    document.getElementById("navSignIn").classList.toggle("hidden", !!user);
+    document.getElementById("navSignOut").classList.toggle("hidden", !user);
+    document.getElementById("navUser").classList.toggle("hidden", !user);
+    document.getElementById("navUser").textContent =
+      user ? user.email : "";
+
+    authCard.classList.toggle("hidden", !!user);
+    welcomeCard.classList.toggle("hidden", !user);
+    composer.classList.toggle("hidden", !user);
+
+    if (user) {
+      document.getElementById("welcomeText").textContent =
+        "Signed in as " + user.email + ". You can now publish a post.";
+    }
+  }
+
+  function getUsername(user) {
+    const metadataName = user.user_metadata &&
+      (user.user_metadata.full_name || user.user_metadata.name);
+
+    if (metadataName && String(metadataName).trim()) {
+      return String(metadataName).trim().slice(0, 80);
+    }
+
+    if (user.email) {
+      return user.email.split("@")[0].slice(0, 80);
+    }
+
+    return "Kaybgram User";
+  }
+
+  async function signUp() {
+    hideMessage(authMessage);
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      showMessage(authMessage, "Enter your email address and password.");
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage(authMessage, "Your password must be at least 6 characters.");
+      return;
+    }
+
+    const button = document.getElementById("signUpButton");
+    button.disabled = true;
+    button.textContent = "Creating account...";
+
+    try {
+      const { data, error } = await client.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.session && data.user) {
+        updateInterface(data.user);
+        showMessage(authMessage, "Your account has been created. Welcome!");
+        await loadPosts();
+      } else {
+        showMessage(
+          authMessage,
+          "Account request received. Check your email for a confirmation link, then return here to sign in."
+        );
+      }
+    } catch (error) {
+      showMessage(authMessage, error.message || "Could not create your account.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Create account";
+    }
+  }
+
+  document.getElementById("authForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    hideMessage(authMessage);
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const button = document.getElementById("signInButton");
+
+    button.disabled = true;
+    button.textContent = "Signing in...";
+
+    try {
+      const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      updateInterface(data.user);
+      showMessage(authMessage, "You are signed in successfully.");
+      await loadPosts();
+    } catch (error) {
+      showMessage(authMessage, error.message || "Could not sign in.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Sign in";
+    }
+  });
+
+  async function signOut() {
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+      alert("Could not sign out: " + error.message);
+      return;
+    }
+
+    updateInterface(null);
+    hideMessage(authMessage);
+    hideMessage(postMessage);
+  }
+
+  document.getElementById("postForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    hideMessage(postMessage);
+
+    if (!currentUser) {
+      showMessage(postMessage, "Please sign in before publishing a post.");
+      return;
+    }
+
+    const content = document.getElementById("postContent").value.trim();
+
+    if (!content) {
+      showMessage(postMessage, "Write something before publishing.");
+      return;
+    }
+
+    const button = document.getElementById("publishButton");
+    button.disabled = true;
+    button.textContent = "Publishing...";
+
+    try {
+      const { error } = await client.from("posts").insert({
+        user_id: currentUser.id,
+        username: getUsername(currentUser),
+        content: content
+      });
+
+      if (error) throw error;
+
+      document.getElementById("postContent").value = "";
+      showMessage(postMessage, "Your post has been published!");
+      await loadPosts();
+    } catch (error) {
+      showMessage(
+        postMessage,
+        "Your post could not be published: " + error.message
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = "Publish post";
+    }
+  });
+
+  function formatDate(value) {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
+  }
+
+  function createPostElement(post) {
+    const article = document.createElement("article");
+    article.className = "post";
+
+    const top = document.createElement("div");
+    top.className = "post-top";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = (post.username || "K").trim().charAt(0).toUpperCase();
+
+    const details = document.createElement("div");
+
+    const name = document.createElement("div");
+    name.className = "post-name";
+    name.textContent = post.username || "Kaybgram User";
+
+    const date = document.createElement("div");
+    date.className = "post-date";
+    date.textContent = formatDate(post.created_at);
+
+    details.append(name, date);
+    top.append(avatar, details);
+
+    const content = document.createElement("div");
+    content.className = "post-content";
+    content.textContent = post.content || "";
+
+    article.append(top, content);
+    return article;
+  }
+
+  async function loadPosts() {
+    if (loadingPosts) return;
+    loadingPosts = true;
+
+    const list = document.getElementById("postsList");
+    const refreshButton = document.getElementById("loadMoreButton");
+
+    list.replaceChildren();
+
+    const loading = document.createElement("div");
+    loading.className = "empty";
+    loading.textContent = "Loading posts...";
+    list.appendChild(loading);
+
+    try {
+      const { data, error } = await client
+        .from("posts")
+        .select("id, user_id, username, content, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      list.replaceChildren();
+
+      if (!data || data.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent =
+          "No posts yet. Sign in and publish the first post in your community!";
+        list.appendChild(empty);
+      } else {
+        data.forEach(function(post) {
+          list.appendChild(createPostElement(post));
+        });
+      }
+
+      refreshButton.classList.remove("hidden");
+    } catch (error) {
+      list.replaceChildren();
+
+      const message = document.createElement("div");
+      message.className = "empty";
+      message.textContent =
+        "We couldn't load the feed. Please refresh the page and try again. Details: " +
+        error.message;
+      list.appendChild(message);
+
+      refreshButton.classList.remove("hidden");
+    } finally {
+      loadingPosts = false;
+    }
+  }
+
+  async function startKaybgram() {
+    const { data, error } = await client.auth.getSession();
+
+    if (error) {
+      console.error("Session check failed:", error.message);
+    }
+
+    updateInterface(data && data.session ? data.session.user : null);
+    await loadPosts();
+
+    client.auth.onAuthStateChange(function(event, session) {
+      updateInterface(session ? session.user : null);
+    });
+  }
+
+  startKaybgram();
+</script>
 </body>
 </html>
