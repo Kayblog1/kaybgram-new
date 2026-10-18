@@ -29,7 +29,7 @@
     .brand span{color:var(--blue2)}
     nav{display:flex;gap:7px;flex-wrap:wrap}
     nav a{color:#d7e3fa;text-decoration:none;padding:8px 10px;border-radius:9px;font-size:13px}
-    nav a:hover,nav a[aria-current="page"]{background:#1a2c49;color:white}
+    nav a:hover{background:#1a2c49}
     .wrap{max-width:850px;margin:25px auto;padding:0 15px 45px}
     .hero{padding:28px 24px;margin-bottom:17px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(130deg,#142b50,#101a2b 65%)}
     .eyebrow{color:var(--blue2);font-size:12px;letter-spacing:2px;font-weight:bold}
@@ -190,6 +190,10 @@
         <textarea class="field" id="bio" maxlength="300" placeholder="Tell the community about yourself"></textarea>
         <label for="profilePhoto">Profile photo (optional, max 5 MB)</label>
         <input class="field" id="profilePhoto" type="file" accept="image/*">
+        <div id="profilePhotoPreviewWrap" class="image-preview-wrap hidden">
+          <p class="small muted">Preview of your new profile photo</p>
+          <img id="profilePhotoPreview" class="image-preview" alt="Preview of your new profile photo">
+        </div>
         <button class="btn" id="saveProfileBtn" type="submit">Save profile</button>
       </form>
     </section>
@@ -200,10 +204,10 @@
       <form id="postForm">
         <label for="caption">What's happening in your world? (optional when adding a photo)</label>
         <textarea class="field" id="caption" maxlength="2000" placeholder="Share something with your community..."></textarea>
-        <label for="postPhoto">Add a photo (optional, max 5 MB)</label>
+        <label for="postPhoto">Add a photo (optional, JPG, PNG, GIF, or WebP; max 5 MB)</label>
         <input class="field" id="postPhoto" type="file" accept="image/*">
         <div id="postPhotoPreviewWrap" class="image-preview-wrap hidden">
-          <img id="postPhotoPreview" class="image-preview" alt="Preview of your post photo">
+          <img id="postPhotoPreview" class="image-preview" alt="Preview of the photo for your post">
           <button class="btn secondary tiny" id="removePostPhoto" type="button" style="margin-top:8px">Remove photo</button>
         </div>
         <button class="btn" id="publishBtn" type="submit">Publish post</button>
@@ -220,7 +224,7 @@
 
     <section class="card hidden" id="messages">
       <h2>💬 Private Messages</h2>
-      <p class="muted small">Choose a Kaybgram member to start a private conversation.</p>
+      <p class="muted small">Choose a Kaybgram member to start a private conversation. Only the people in a conversation can read its messages.</p>
       <div id="messagesStatus" class="status" role="status"></div>
       <label for="messageMember">Choose a member</label>
       <select class="field" id="messageMember"><option value="">Loading members...</option></select>
@@ -234,6 +238,8 @@
         <div class="message-compose">
           <textarea class="field" id="messageText" maxlength="2000" placeholder="Write your message..." required></textarea>
           <button class="btn" id="sendMessageBtn" type="submit">Send</button>
+
+          
         </div>
       </form>
     </section>
@@ -252,9 +258,6 @@
       <div id="postsList"><div class="card"><p class="muted">Loading community posts...</p></div></div>
     </section>
   </main>
-</body>
-</html>
-
 
   <footer>Kaybgram · Connect with care.</footer>
 
@@ -454,6 +457,55 @@
       return data.publicUrl;
     }
 
+    let profilePhotoPreviewUrl = null;
+
+    function clearProfilePhotoPreview() {
+      if (profilePhotoPreviewUrl) {
+        URL.revokeObjectURL(profilePhotoPreviewUrl);
+        profilePhotoPreviewUrl = null;
+      }
+      $("profilePhotoPreview").removeAttribute("src");
+      $("profilePhotoPreviewWrap").classList.add("hidden");
+      $("profilePhoto").value = "";
+    }
+
+    $("profilePhoto").addEventListener("change", () => {
+      const file = $("profilePhoto").files[0];
+      const preview = $("profilePhotoPreview");
+      hideStatus("profileStatus");
+
+      if (profilePhotoPreviewUrl) {
+        URL.revokeObjectURL(profilePhotoPreviewUrl);
+        profilePhotoPreviewUrl = null;
+      }
+
+      if (!file) {
+        preview.removeAttribute("src");
+        $("profilePhotoPreviewWrap").classList.add("hidden");
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        $("profilePhoto").value = "";
+        preview.removeAttribute("src");
+        $("profilePhotoPreviewWrap").classList.add("hidden");
+        showStatus("profileStatus", "Please choose an image file.", "error");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        $("profilePhoto").value = "";
+        preview.removeAttribute("src");
+        $("profilePhotoPreviewWrap").classList.add("hidden");
+        showStatus("profileStatus", "Your profile photo must be 5 MB or smaller.", "error");
+        return;
+      }
+
+      profilePhotoPreviewUrl = URL.createObjectURL(file);
+      preview.src = profilePhotoPreviewUrl;
+      $("profilePhotoPreviewWrap").classList.remove("hidden");
+    });
+
     $("profileForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!currentUser) return showStatus("profileStatus", "Please sign in first.", "error");
@@ -468,7 +520,7 @@
         const photo = $("profilePhoto").files[0];
         const newAvatarUrl = photo ? await uploadProfilePhoto(photo) : (currentProfile?.avatar_url || "");
         await saveProfileData(displayName, bio, newAvatarUrl);
-        $("profilePhoto").value = "";
+        clearProfilePhotoPreview();
         await loadMyProfile();
         showStatus("profileStatus", "Your profile has been saved.", "success");
         await loadPosts();
@@ -480,7 +532,8 @@
       }
     });
 
-    // STORIES: Load active Stories and their authors' profiles.
+    
+    // STORIES: Load active Stories and the authors' profiles.
     async function loadStories() {
       const list = $("storiesList");
       list.replaceChildren(makeElement("p", "muted small", "Loading Stories..."));
@@ -653,8 +706,6 @@
     }
 
     function createPostCard(post, profile, postLikes, postComments, isFollowing) {
-
-    
       const card = makeElement("article", "card post");
       const head = makeElement("div", "post-head");
       const identity = makeElement("div", "profile-row");
@@ -845,6 +896,7 @@
       return card;
     }
 
+    
     $("authForm").addEventListener("submit", async event => {
       event.preventDefault();
       const email = $("authEmail").value.trim();
@@ -989,7 +1041,6 @@
       }
     });
 
-    // PRIVATE MESSAGES
     async function loadMembers() {
       if (!currentUser) {
         showStatus("messagesStatus", "Please sign in to send private messages.", "error");
@@ -1126,7 +1177,6 @@
     $("refreshFeed").addEventListener("click", loadPosts);
     $("refreshNotifications").addEventListener("click", loadNotifications);
 
-    // Navigation: show one main section at a time instead of stacking everything.
     const pageSections = ["stories", "account", "myProfile", "create", "notifications", "messages", "feed"];
     const heroSection = document.querySelector("main.wrap > .hero");
 
