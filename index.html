@@ -29,7 +29,7 @@
     .brand span{color:var(--blue2)}
     nav{display:flex;gap:7px;flex-wrap:wrap}
     nav a{color:#d7e3fa;text-decoration:none;padding:8px 10px;border-radius:9px;font-size:13px}
-    nav a:hover{background:#1a2c49}
+    nav a:hover,nav a[aria-current="page"]{background:#1a2c49;color:white}
     .wrap{max-width:850px;margin:25px auto;padding:0 15px 45px}
     .hero{padding:28px 24px;margin-bottom:17px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(130deg,#142b50,#101a2b 65%)}
     .eyebrow{color:var(--blue2);font-size:12px;letter-spacing:2px;font-weight:bold}
@@ -64,6 +64,9 @@
     .post{margin-bottom:15px}
     .post-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
     .post-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0}
+    .post-image{display:block;width:100%;max-height:620px;object-fit:contain;background:#07101e;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+    .image-preview-wrap{margin:10px 0 14px}
+    .image-preview{display:block;max-width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:12px;background:#07101e}
     .post-actions{display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line);padding-top:12px}
     .comment-list{display:grid;gap:8px;margin:12px 0}
     .comment{background:#0a1424;border:1px solid #21324b;border-radius:10px;padding:10px;overflow-wrap:anywhere}
@@ -79,8 +82,6 @@
     .message-row.mine .message-bubble{background:#1e5bc1;border-radius:14px 14px 4px 14px}
     .message-meta{margin-top:5px;color:#c1d2ed;font-size:11px}
     .message-compose{display:flex;gap:9px;align-items:flex-end}
-
-    /* STORIES */
     .stories-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-top:14px}
     .story-card{position:relative;min-height:155px;padding:15px;border-radius:15px;border:1px solid #35517b;background:linear-gradient(145deg,#1a3764,#101a2b);display:flex;flex-direction:column;justify-content:space-between;overflow-wrap:anywhere}
     .story-card.own{background:linear-gradient(145deg,#193e68,#10233e);border-color:#3984ff}
@@ -129,7 +130,6 @@
       <p class="muted">A fresh home for your social life. Share your world, meet people, and stay connected.</p>
     </section>
 
-    <!-- STORIES -->
     <section class="card" id="stories">
       <div class="post-head">
         <div>
@@ -139,7 +139,6 @@
         <button class="btn secondary tiny" id="refreshStories" type="button">Refresh</button>
       </div>
       <div id="storiesStatus" class="status" role="status"></div>
-
       <div id="storyComposer" class="hidden">
         <form id="storyForm">
           <label for="storyText">Create your Story</label>
@@ -199,8 +198,14 @@
       <h2>✍️ Create a post</h2>
       <div id="postStatus" class="status" role="status"></div>
       <form id="postForm">
-        <label for="caption">What's happening in your world?</label>
-        <textarea class="field" id="caption" maxlength="2000" placeholder="Share something with your community..." required></textarea>
+        <label for="caption">What's happening in your world? (optional when adding a photo)</label>
+        <textarea class="field" id="caption" maxlength="2000" placeholder="Share something with your community..."></textarea>
+        <label for="postPhoto">Add a photo (optional, max 5 MB)</label>
+        <input class="field" id="postPhoto" type="file" accept="image/*">
+        <div id="postPhotoPreviewWrap" class="image-preview-wrap hidden">
+          <img id="postPhotoPreview" class="image-preview" alt="Preview of your post photo">
+          <button class="btn secondary tiny" id="removePostPhoto" type="button" style="margin-top:8px">Remove photo</button>
+        </div>
         <button class="btn" id="publishBtn" type="submit">Publish post</button>
       </form>
     </section>
@@ -215,7 +220,7 @@
 
     <section class="card hidden" id="messages">
       <h2>💬 Private Messages</h2>
-      <p class="muted small">Choose a Kaybgram member to start a private conversation. Only the people in a conversation can read its messages.</p>
+      <p class="muted small">Choose a Kaybgram member to start a private conversation.</p>
       <div id="messagesStatus" class="status" role="status"></div>
       <label for="messageMember">Choose a member</label>
       <select class="field" id="messageMember"><option value="">Loading members...</option></select>
@@ -247,6 +252,9 @@
       <div id="postsList"><div class="card"><p class="muted">Loading community posts...</p></div></div>
     </section>
   </main>
+</body>
+</html>
+
 
   <footer>Kaybgram · Connect with care.</footer>
 
@@ -472,7 +480,7 @@
       }
     });
 
-    // STORIES: Load active Stories and the authors' profiles.
+    // STORIES: Load active Stories and their authors' profiles.
     async function loadStories() {
       const list = $("storiesList");
       list.replaceChildren(makeElement("p", "muted small", "Loading Stories..."));
@@ -566,7 +574,6 @@
       button.disabled = true;
       hideStatus("storiesStatus");
       try {
-        // Supabase supplies created_at and expires_at defaults.
         const { error } = await client.from("stories").insert({
           user_id: currentUser.id,
           content
@@ -592,7 +599,7 @@
       hideStatus("feedStatus");
 
       const { data: posts, error } = await client.from("posts")
-        .select("id,user_id,content,created_at")
+        .select("id,user_id,content,image_url,created_at")
         .order("created_at", { ascending: false }).limit(50);
 
       if (error) {
@@ -646,6 +653,8 @@
     }
 
     function createPostCard(post, profile, postLikes, postComments, isFollowing) {
+
+    
       const card = makeElement("article", "card post");
       const head = makeElement("div", "post-head");
       const identity = makeElement("div", "profile-row");
@@ -705,6 +714,19 @@
       head.append(controls);
 
       const content = makeElement("div", "post-content", post.content || "");
+      if (!post.content) content.style.display = "none";
+      let postImage = null;
+      if (post.image_url) {
+        postImage = makeElement("img", "post-image");
+        postImage.src = post.image_url;
+        postImage.alt = "Photo shared in a Kaybgram post";
+        postImage.loading = "lazy";
+        postImage.onerror = () => {
+          postImage.onerror = null;
+          postImage.alt = "This post photo could not be loaded.";
+          postImage.style.display = "none";
+        };
+      }
       const actions = makeElement("div", "post-actions");
       const userLiked = !!(currentUser && postLikes.some(l => l.user_id === currentUser.id));
       const likeBtn = makeElement("button", "btn secondary tiny",
@@ -817,7 +839,9 @@
       commentsArea.append(commentsList);
       if (currentUser) commentsArea.append(commentForm);
       else commentsArea.append(makeElement("p", "muted small", "Sign in to leave a comment."));
-      card.append(head, content, actions, commentsArea);
+      card.append(head, content);
+      if (postImage) card.append(postImage);
+      card.append(actions, commentsArea);
       return card;
     }
 
@@ -873,20 +897,89 @@
       }
     });
 
+    function clearPostPhotoPreview() {
+      const preview = $("postPhotoPreview");
+      if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+      preview.removeAttribute("src");
+      delete preview.dataset.objectUrl;
+      $("postPhoto").value = "";
+      $("postPhotoPreviewWrap").classList.add("hidden");
+    }
+
+    $("postPhoto").addEventListener("change", () => {
+      const file = $("postPhoto").files[0];
+      hideStatus("postStatus");
+      if (!file) {
+        clearPostPhotoPreview();
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        clearPostPhotoPreview();
+        showStatus("postStatus", "Please choose an image file.", "error");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        clearPostPhotoPreview();
+        showStatus("postStatus", "Your post photo must be 5 MB or smaller.", "error");
+        return;
+      }
+      const preview = $("postPhotoPreview");
+      if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+      const objectUrl = URL.createObjectURL(file);
+      preview.src = objectUrl;
+      preview.dataset.objectUrl = objectUrl;
+      $("postPhotoPreviewWrap").classList.remove("hidden");
+    });
+
+    $("removePostPhoto").addEventListener("click", clearPostPhotoPreview);
+
+    async function uploadPostPhoto(file) {
+      if (!currentUser) throw new Error("Please sign in before uploading a photo.");
+      if (!file || !file.type.startsWith("image/")) throw new Error("Please choose a valid image file.");
+      if (file.size > 5 * 1024 * 1024) throw new Error("Your post photo must be 5 MB or smaller.");
+
+      const extensionFromName = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const extension = extensionFromName || (file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : file.type === "image/gif" ? "gif" : "jpg");
+      const path = currentUser.id + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 10) + "." + extension;
+      const { error } = await client.storage.from("post-photos").upload(path, file, {
+        cacheControl: "3600", upsert: false, contentType: file.type
+      });
+      if (error) {
+        throw new Error("Photo upload failed. Check the post-photos bucket and its upload policy. " + error.message);
+      }
+      const { data } = client.storage.from("post-photos").getPublicUrl(path);
+      return data.publicUrl;
+    }
+
     $("postForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!currentUser) return showStatus("postStatus", "Please sign in first.", "error");
       const content = $("caption").value.trim();
-      if (!content) return;
+      const photo = $("postPhoto").files[0] || null;
+      if (!content && !photo) {
+        showStatus("postStatus", "Write a caption or choose a photo before publishing.", "error");
+        return;
+      }
+      if (photo && (!photo.type.startsWith("image/") || photo.size > 5 * 1024 * 1024)) {
+        showStatus("postStatus", "Choose an image file that is 5 MB or smaller.", "error");
+        return;
+      }
+
       const button = $("publishBtn");
       button.disabled = true;
       hideStatus("postStatus");
       try {
+        let imageUrl = null;
+        if (photo) {
+          showStatus("postStatus", "Uploading your photo... please wait.");
+          imageUrl = await uploadPostPhoto(photo);
+        }
         const { error } = await client.from("posts").insert({
-          user_id: currentUser.id, content
+          user_id: currentUser.id, content, image_url: imageUrl
         });
         if (error) throw error;
         $("caption").value = "";
+        clearPostPhotoPreview();
         showStatus("postStatus", "Your post has been published.", "success");
         await loadPosts();
       } catch (error) {
@@ -1033,26 +1126,44 @@
     $("refreshFeed").addEventListener("click", loadPosts);
     $("refreshNotifications").addEventListener("click", loadNotifications);
 
-    // Navigation
+    // Navigation: show one main section at a time instead of stacking everything.
+    const pageSections = ["stories", "account", "myProfile", "create", "notifications", "messages", "feed"];
+    const heroSection = document.querySelector("main.wrap > .hero");
+
+    function showPage(pageId) {
+      const page = pageId === "home" ? "home" : pageId;
+      pageSections.forEach(id => {
+        const section = $(id);
+        if (section) section.classList.toggle("hidden", id !== page && !(page === "home" && id === "feed"));
+      });
+      if (heroSection) heroSection.classList.toggle("hidden", page !== "home");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+        const linkPage = link.getAttribute("href").slice(1);
+        link.setAttribute("aria-current", (linkPage === page || (page === "home" && linkPage === "home")) ? "page" : "false");
+      });
+    }
+
     document.querySelectorAll('nav a[href^="#"]').forEach(link => {
       link.addEventListener("click", async event => {
+        event.preventDefault();
         const targetId = link.getAttribute("href").slice(1);
-        const target = $(targetId);
-        if (!target) return;
+        if (!["home", ...pageSections].includes(targetId)) return;
 
         if (["notifications", "messages", "myProfile", "create"].includes(targetId) && !currentUser) {
-          event.preventDefault();
+          showPage("account");
           showStatus("authStatus", "Please sign in to use this feature.", "error");
-          $("account").scrollIntoView({ behavior: "smooth" });
           return;
         }
 
-        if (["notifications", "messages", "myProfile", "create"].includes(targetId)) target.classList.remove("hidden");
+        showPage(targetId);
         if (targetId === "notifications") await loadNotifications();
         if (targetId === "messages") await loadMembers();
         if (targetId === "stories") await loadStories();
       });
     });
+
+    showPage("home");
 
     async function startKaybgram() {
       const { data, error } = await client.auth.getSession();
