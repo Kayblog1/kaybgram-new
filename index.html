@@ -93,6 +93,7 @@ border:1px solid var(--border);border-radius:10px}
 .profile-info{flex:1;min-width:0}
 .profile-name{font-size:21px;font-weight:bold;overflow-wrap:anywhere}
 .profile-bio{white-space:pre-wrap;overflow-wrap:anywhere}
+.upload-note{margin:8px 0;color:var(--muted);font-size:13px}
 footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:13px}
 @media(max-width:780px){
 .page{grid-template-columns:1fr;margin-top:16px}
@@ -144,7 +145,6 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
     <div id="authStatus" class="status" role="status"></div>
   </section>
 
-  <!-- NEW: Profile display and editor -->
   <section class="card hidden" id="myProfile">
     <h2>My Profile</h2>
     <div class="profile-top">
@@ -158,7 +158,8 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
 
     <div style="height:1px;background:var(--border);margin:18px 0"></div>
     <h2>Edit Profile</h2>
-    <p class="muted small">Your name and bio will be saved to your Kaybgram profile.</p>
+    <p class="muted small">Update your name, bio, and profile photo.</p>
+
     <form id="profileForm">
       <label for="displayName" class="small">Display name</label>
       <input class="field" id="displayName" maxlength="80" placeholder="Your name" required>
@@ -166,9 +167,15 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
       <label for="bio" class="small">Bio</label>
       <textarea class="field" id="bio" maxlength="300" placeholder="Tell the community about yourself (up to 300 characters)"></textarea>
 
-      <label for="avatarUrl" class="small">Profile picture URL (optional)</label>
+      <label for="profilePhoto" class="small">Upload a profile photo</label>
+      <input class="field" id="profilePhoto" type="file" accept="image/*">
+      <p class="upload-note">Choose an image from your phone or computer. Maximum file size: 5 MB.</p>
+      <div class="actions">
+        <button class="btn" id="uploadPhotoBtn" type="button">Upload Photo</button>
+      </div>
+
+      <label for="avatarUrl" class="small">Or use a public profile picture URL</label>
       <input class="field" id="avatarUrl" type="url" maxlength="1000" placeholder="https://example.com/your-photo.jpg">
-      <p class="muted small">Enter a public image URL beginning with https://. Direct photo uploads can be added later.</p>
 
       <div class="actions">
         <button class="btn" id="saveProfileBtn" type="submit">Save Profile</button>
@@ -215,6 +222,8 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
 const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
 const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const PHOTO_BUCKET = "profile-photos";
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
 
 let currentUser = null;
 let currentProfile = null;
@@ -346,7 +355,6 @@ async function loadPosts() {
     let comments = [];
     let profiles = [];
 
-    // Load public profile details for people who posted in the feed.
     const authorIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
     if (authorIds.length) {
       const { data, error: profilesError } = await client
@@ -594,6 +602,104 @@ function createPostCard(post, likeCount, liked, comments, profile) {
   return card;
 }
 
+// Save the name, bio and profile picture URL to the profiles table.
+async function saveProfileData(avatarUrl) {
+  const displayName = $("displayName").value.trim();
+  const bio = $("bio").value.trim();
+
+  if (!displayName) {
+    throw new Error("Please enter a display name before saving.");
+  }
+
+  const profileData = {
+    user_id: currentUser.id,
+    display_name: displayName,
+    bio,
+    avatar_url: avatarUrl,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await client.from("profiles").upsert(profileData, {
+    onConflict: "user_id"
+  });
+  if (error) throw error;
+
+  currentProfile = profileData;
+  $("avatarUrl").value = avatarUrl || "";
+  renderMyProfile();
+  await loadPosts();
+}
+
+// Upload a photo to the user's own folder in Supabase Storage.
+$("uploadPhotoBtn").addEventListener("click", async () => {
+  hideStatus("profileStatus");
+
+  if (!currentUser) {
+    showStatus("profileStatus", "Please sign in first.", true);
+    return;
+  }
+
+  const file = $("profilePhoto").files[0];
+
+  if (!file) {
+    showStatus("profileStatus", "Please choose a photo first.", true);
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    showStatus("profileStatus", "Please choose an image file.", true);
+    return;
+  }
+
+  if (file.size > MAX_PHOTO_SIZE) {
+    showStatus("profileStatus", "This photo is larger than 5 MB. Please choose a smaller image.", true);
+    return;
+  }
+
+  const extensionFromName = file.name.includes(".")
+    ? file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "")
+    : "";
+  const extensionFromType = file.type.split("/")[1]?.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const extension = extensionFromName || extensionFromType || "jpg";
+  const filePath = currentUser.id + "/" + Date.now() + "-" +
+    Math.random().toString(36).slice(2) + "." + extension;
+
+  $("uploadPhotoBtn").disabled = true;
+  $("uploadPhotoBtn").textContent = "Uploading...";
+
+  try {
+    const { error: uploadError } = await client.storage
+      .from(PHOTO_BUCKET)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: publicData } = client.storage
+      .from(PHOTO_BUCKET)
+      .getPublicUrl(filePath);
+
+    const photoUrl = publicData?.publicUrl;
+    if (!photoUrl) {
+      throw new Error("The photo uploaded, but its public URL could not be created.");
+    }
+
+    await saveProfileData(photoUrl);
+    $("profilePhoto").value = "";
+    showStatus("profileStatus", "Your photo uploaded successfully and your profile was saved!");
+  } catch (error) {
+    showStatus("profileStatus",
+      "Photo upload failed: " + (error.message || "Please try again."),
+      true);
+  } finally {
+    $("uploadPhotoBtn").disabled = false;
+    $("uploadPhotoBtn").textContent = "Upload Photo";
+  }
+});
+
 // Save or update the signed-in member's profile.
 $("profileForm").addEventListener("submit", async event => {
   event.preventDefault();
@@ -604,14 +710,8 @@ $("profileForm").addEventListener("submit", async event => {
     return;
   }
 
-  const displayName = $("displayName").value.trim();
-  const bio = $("bio").value.trim();
   const rawAvatarUrl = $("avatarUrl").value.trim();
 
-  if (!displayName) {
-    showStatus("profileStatus", "Please enter a display name.", true);
-    return;
-  }
   if (rawAvatarUrl && !validImageUrl(rawAvatarUrl)) {
     showStatus("profileStatus",
       "Please use a valid public image URL beginning with https://.", true);
@@ -620,23 +720,8 @@ $("profileForm").addEventListener("submit", async event => {
 
   $("saveProfileBtn").disabled = true;
   try {
-    const profileData = {
-      user_id: currentUser.id,
-      display_name: displayName,
-      bio,
-      avatar_url: rawAvatarUrl ? validImageUrl(rawAvatarUrl) : "",
-      updated_at: new Date().toISOString()
-    };
-
-    const { error } = await client.from("profiles").upsert(profileData, {
-      onConflict: "user_id"
-    });
-    if (error) throw error;
-
-    currentProfile = profileData;
-    renderMyProfile();
+    await saveProfileData(rawAvatarUrl ? validImageUrl(rawAvatarUrl) : "");
     showStatus("profileStatus", "Your profile was saved successfully!");
-    await loadPosts();
   } catch (error) {
     showStatus("profileStatus",
       "Could not save your profile: " + error.message, true);
@@ -778,7 +863,7 @@ async function startKaybgram() {
 client.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
   updateAuthUI();
-  // Load profile after auth changes without blocking the auth callback.
+
   if (currentUser) {
     loadMyProfile()
       .then(() => loadPosts())
