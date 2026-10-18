@@ -94,6 +94,27 @@ border:1px solid var(--border);border-radius:10px}
 .profile-name{font-size:21px;font-weight:bold;overflow-wrap:anywhere}
 .profile-bio{white-space:pre-wrap;overflow-wrap:anywhere}
 .upload-note{margin:8px 0;color:var(--muted);font-size:13px}
+
+/* Follow and Unfollow buttons */
+.follow-btn{
+  margin-left:auto;
+  flex-shrink:0;
+  border:1px solid #315b93;
+  border-radius:9px;
+  padding:7px 11px;
+  background:#172b49;
+  color:#cfe1ff;
+  font-weight:bold;
+  cursor:pointer;
+}
+.follow-btn:hover{background:#22416c}
+.follow-btn.following{
+  background:#172239;
+  color:#b9c7df;
+  border-color:#34435d;
+}
+.follow-btn:disabled{opacity:.6;cursor:wait}
+
 footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:13px}
 @media(max-width:780px){
 .page{grid-template-columns:1fr;margin-top:16px}
@@ -229,6 +250,7 @@ let currentUser = null;
 let currentProfile = null;
 let postsLoading = false;
 let reloadRequested = false;
+
 const $ = id => document.getElementById(id);
 
 function showStatus(id, message, isError = false) {
@@ -293,6 +315,7 @@ function setAvatar(element, name, url) {
     element.textContent = (name || "K").trim().charAt(0).toUpperCase() || "K";
   }
 }
+
 async function loadMyProfile() {
   if (!currentUser) {
     currentProfile = null;
@@ -321,6 +344,7 @@ async function loadMyProfile() {
   $("avatarUrl").value = currentProfile.avatar_url || "";
   renderMyProfile();
 }
+
 function renderMyProfile() {
   const name = usernameFor(currentUser);
   $("profileDisplayName").textContent = name;
@@ -334,6 +358,7 @@ async function loadPosts() {
     reloadRequested = true;
     return;
   }
+
   postsLoading = true;
   const container = $("posts");
   container.replaceChildren();
@@ -344,6 +369,7 @@ async function loadPosts() {
       .from("posts")
       .select("id,user_id,username,content,created_at")
       .order("created_at", { ascending: false });
+
     if (error) throw error;
 
     if (!posts || posts.length === 0) {
@@ -354,13 +380,16 @@ async function loadPosts() {
     let likes = [];
     let comments = [];
     let profiles = [];
+    let followedUserIds = new Set();
 
     const authorIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
+
     if (authorIds.length) {
       const { data, error: profilesError } = await client
         .from("profiles")
         .select("user_id,display_name,bio,avatar_url")
         .in("user_id", authorIds);
+
       if (profilesError) throw profilesError;
       profiles = data || [];
     }
@@ -369,31 +398,51 @@ async function loadPosts() {
       const { data, error: likesError } = await client
         .from("likes")
         .select("post_id,user_id");
+
       if (likesError) throw likesError;
       likes = data || [];
 
       const postIds = posts.map(post => post.id);
+
       const { data: commentRows, error: commentsError } = await client
         .from("comments")
         .select("id,post_id,user_id,content,created_at")
         .in("post_id", postIds)
         .order("created_at", { ascending: true });
+
       if (commentsError) throw commentsError;
       comments = commentRows || [];
+
+      // Load members this signed-in user already follows.
+      const { data: followRows, error: followsError } = await client
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", currentUser.id);
+
+      if (followsError) throw followsError;
+
+      followedUserIds = new Set(
+        (followRows || []).map(row => row.following_id)
+      );
     }
 
     const profilesByUser = new Map(
       profiles.map(profile => [profile.user_id, profile])
     );
+
     const likeCounts = new Map();
     const likedByMe = new Set();
+
     for (const like of likes) {
       const id = String(like.post_id);
       likeCounts.set(id, (likeCounts.get(id) || 0) + 1);
-      if (currentUser && like.user_id === currentUser.id) likedByMe.add(id);
+      if (currentUser && like.user_id === currentUser.id) {
+        likedByMe.add(id);
+      }
     }
 
     const commentsByPost = new Map();
+
     for (const comment of comments) {
       const id = String(comment.post_id);
       if (!commentsByPost.has(id)) commentsByPost.set(id, []);
@@ -402,21 +451,27 @@ async function loadPosts() {
 
     for (const post of posts) {
       const profile = profilesByUser.get(post.user_id);
+
       container.appendChild(createPostCard(
         post,
         likeCounts.get(String(post.id)) || 0,
         likedByMe.has(String(post.id)),
         commentsByPost.get(String(post.id)) || [],
-        profile
+        profile,
+        followedUserIds.has(post.user_id)
       ));
     }
+
     hideStatus("feedStatus");
   } catch (error) {
-    showStatus("feedStatus",
+    showStatus(
+      "feedStatus",
       "Could not load the feed: " + (error.message || "Please try again."),
-      true);
+      true
+    );
   } finally {
     postsLoading = false;
+
     if (reloadRequested) {
       reloadRequested = false;
       loadPosts();
@@ -424,26 +479,92 @@ async function loadPosts() {
   }
 }
 
-function createPostCard(post, likeCount, liked, comments, profile) {
+function createPostCard(
+  post, likeCount, liked, comments, profile, isFollowing = false
+) {
   const card = makeElement("article", "post");
-  const displayName = profile?.display_name?.trim() || post.username || "Kaybgram member";
+  const displayName =
+    profile?.display_name?.trim() || post.username || "Kaybgram member";
   const avatarUrl = profile?.avatar_url || "";
+
   const head = makeElement("div", "post-head");
   const avatar = makeElement("div", "avatar");
   setAvatar(avatar, displayName, avatarUrl);
+
   const details = makeElement("div");
   details.appendChild(makeElement("div", "post-name", displayName));
   details.appendChild(makeElement("div", "post-date", formatDate(post.created_at)));
   head.append(avatar, details);
+
+  // Only show Follow on another member's post, never on your own.
+  if (
+    currentUser &&
+    post.user_id &&
+    post.user_id !== currentUser.id
+  ) {
+    const followButton = makeElement(
+      "button",
+      "follow-btn" + (isFollowing ? " following" : ""),
+      isFollowing ? "Following" : "+ Follow"
+    );
+
+    followButton.type = "button";
+    followButton.setAttribute("aria-pressed", String(isFollowing));
+
+    followButton.addEventListener("click", async () => {
+      if (!currentUser || followButton.disabled) return;
+
+      followButton.disabled = true;
+
+      try {
+        if (followButton.classList.contains("following")) {
+          const { error } = await client
+            .from("follows")
+            .delete()
+            .eq("follower_id", currentUser.id)
+            .eq("following_id", post.user_id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await client
+            .from("follows")
+            .insert({
+              follower_id: currentUser.id,
+              following_id: post.user_id
+            });
+
+          if (error) throw error;
+        }
+
+        await loadPosts();
+      } catch (error) {
+        showStatus(
+          "feedStatus",
+          "Could not update follow status: " +
+            (error.message || "Please try again."),
+          true
+        );
+
+        followButton.disabled = false;
+      }
+    });
+
+    head.appendChild(followButton);
+  }
+
   card.appendChild(head);
   card.appendChild(makeElement("div", "post-content", post.content || ""));
 
   const actions = makeElement("div", "post-actions");
-  const likeButton = makeElement("button",
-    "action-btn" + (liked ? " liked" : ""));
+  const likeButton = makeElement(
+    "button",
+    "action-btn" + (liked ? " liked" : "")
+  );
+
   likeButton.type = "button";
   likeButton.setAttribute("aria-pressed", String(liked));
   likeButton.textContent = liked ? "♥ Unlike" : "♡ Like";
+
   const count = makeElement("span", "count", String(likeCount));
   count.setAttribute("aria-label", likeCount + " likes");
   likeButton.appendChild(count);
@@ -454,18 +575,23 @@ function createPostCard(post, likeCount, liked, comments, profile) {
       $("account").scrollIntoView({ behavior: "smooth" });
       return;
     }
+
     if (likeButton.disabled) return;
     likeButton.disabled = true;
+
     try {
       let result;
+
       if (likeButton.classList.contains("liked")) {
         result = await client.from("likes").delete()
           .eq("post_id", post.id).eq("user_id", currentUser.id);
       } else {
         result = await client.from("likes").insert({
-          post_id: post.id, user_id: currentUser.id
+          post_id: post.id,
+          user_id: currentUser.id
         });
       }
+
       if (result.error) throw result.error;
       await loadPosts();
     } catch (error) {
@@ -473,21 +599,27 @@ function createPostCard(post, likeCount, liked, comments, profile) {
       likeButton.disabled = false;
     }
   });
+
   actions.appendChild(likeButton);
 
-  const commentButton = makeElement("button", "action-btn",
-    "Comment (" + comments.length + ")");
+  const commentButton = makeElement(
+    "button", "action-btn", "Comment (" + comments.length + ")"
+  );
   commentButton.type = "button";
   actions.appendChild(commentButton);
 
   const shareButton = makeElement("button", "action-btn", "Share");
   shareButton.type = "button";
+
   shareButton.addEventListener("click", async () => {
     const shareText = displayName + ": " + (post.content || "");
+
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Kaybgram post", text: shareText, url: location.href
+          title: "Kaybgram post",
+          text: shareText,
+          url: location.href
         });
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareText + "\n" + location.href);
@@ -501,84 +633,116 @@ function createPostCard(post, likeCount, liked, comments, profile) {
       }
     }
   });
+
   actions.appendChild(shareButton);
   card.appendChild(actions);
 
   const commentSection = makeElement("section", "comments");
-  commentSection.appendChild(makeElement("div", "comments-title",
-    "Comments (" + comments.length + ")"));
+  commentSection.appendChild(makeElement(
+    "div", "comments-title", "Comments (" + comments.length + ")"
+  ));
 
   const commentList = makeElement("div", "comment-list");
+
   if (!currentUser) {
-    commentList.appendChild(makeElement("p", "muted small",
-      "Sign in to view and add comments."));
+    commentList.appendChild(makeElement(
+      "p", "muted small", "Sign in to view and add comments."
+    ));
   } else if (comments.length === 0) {
-    commentList.appendChild(makeElement("p", "muted small",
-      "No comments yet. Be the first to comment!"));
+    commentList.appendChild(makeElement(
+      "p", "muted small", "No comments yet. Be the first to comment!"
+    ));
   } else {
     for (const comment of comments) {
       const item = makeElement("div", "comment");
       const commentHead = makeElement("div", "comment-head");
-      commentHead.appendChild(makeElement("span", "",
-        comment.user_id === currentUser.id ? "You" : "Kaybgram member"));
-      commentHead.appendChild(makeElement("span", "", formatDate(comment.created_at)));
+
+      commentHead.appendChild(makeElement(
+        "span", "",
+        comment.user_id === currentUser.id ? "You" : "Kaybgram member"
+      ));
+
+      commentHead.appendChild(makeElement(
+        "span", "", formatDate(comment.created_at)
+      ));
+
       item.appendChild(commentHead);
       item.appendChild(makeElement("div", "comment-text", comment.content));
 
       if (comment.user_id === currentUser.id) {
         const deleteButton = makeElement("button", "action-btn", "Delete");
         deleteButton.type = "button";
+
         deleteButton.addEventListener("click", async () => {
           if (!confirm("Delete your comment?")) return;
           deleteButton.disabled = true;
+
           try {
             const { error } = await client.from("comments").delete()
               .eq("id", comment.id).eq("user_id", currentUser.id);
+
             if (error) throw error;
             await loadPosts();
           } catch (error) {
-            showStatus("feedStatus", "Could not delete comment: " + error.message, true);
+            showStatus(
+              "feedStatus", "Could not delete comment: " + error.message, true
+            );
             deleteButton.disabled = false;
           }
         });
+
         item.appendChild(deleteButton);
       }
+
       commentList.appendChild(item);
     }
   }
+
   commentSection.appendChild(commentList);
 
   const commentForm = makeElement("form", "comment-form");
   const commentInput = makeElement("textarea", "comment-input");
+
   commentInput.rows = 1;
   commentInput.maxLength = 2000;
-  commentInput.placeholder = currentUser ? "Write a comment..." : "Sign in to comment";
+  commentInput.placeholder = currentUser
+    ? "Write a comment..."
+    : "Sign in to comment";
   commentInput.setAttribute("aria-label", "Write a comment");
   commentInput.disabled = !currentUser;
+
   const sendButton = makeElement("button", "btn", "Send");
   sendButton.type = "submit";
   sendButton.disabled = !currentUser;
+
   commentForm.append(commentInput, sendButton);
 
   commentForm.addEventListener("submit", async event => {
     event.preventDefault();
+
     if (!currentUser) {
       showStatus("authStatus", "Please sign in before commenting.", true);
       return;
     }
+
     const content = commentInput.value.trim();
+
     if (!content) {
       commentInput.focus();
       return;
     }
+
     sendButton.disabled = true;
+
     try {
       const { error } = await client.from("comments").insert({
         post_id: post.id,
         user_id: currentUser.id,
         content
       });
+
       if (error) throw error;
+
       commentInput.value = "";
       showStatus("feedStatus", "Your comment was saved!");
       await loadPosts();
@@ -591,18 +755,22 @@ function createPostCard(post, likeCount, liked, comments, profile) {
 
   commentSection.appendChild(commentForm);
   card.appendChild(commentSection);
+
   commentButton.addEventListener("click", () => {
     commentSection.scrollIntoView({ behavior: "smooth", block: "center" });
-    if (currentUser) commentInput.focus();
-    else {
+
+    if (currentUser) {
+      commentInput.focus();
+    } else {
       showStatus("authStatus", "Please sign in to view and add comments.");
       $("account").scrollIntoView({ behavior: "smooth" });
     }
   });
+
   return card;
 }
 
-// Save the name, bio and profile picture URL to the profiles table.
+// Save the name, bio and profile picture URL.
 async function saveProfileData(avatarUrl) {
   const displayName = $("displayName").value.trim();
   const bio = $("bio").value.trim();
@@ -622,6 +790,7 @@ async function saveProfileData(avatarUrl) {
   const { error } = await client.from("profiles").upsert(profileData, {
     onConflict: "user_id"
   });
+
   if (error) throw error;
 
   currentProfile = profileData;
@@ -630,7 +799,7 @@ async function saveProfileData(avatarUrl) {
   await loadPosts();
 }
 
-// Upload a photo to the user's own folder in Supabase Storage.
+// Upload a profile photo to the user's own Supabase Storage folder.
 $("uploadPhotoBtn").addEventListener("click", async () => {
   hideStatus("profileStatus");
 
@@ -652,15 +821,23 @@ $("uploadPhotoBtn").addEventListener("click", async () => {
   }
 
   if (file.size > MAX_PHOTO_SIZE) {
-    showStatus("profileStatus", "This photo is larger than 5 MB. Please choose a smaller image.", true);
+    showStatus(
+      "profileStatus",
+      "This photo is larger than 5 MB. Please choose a smaller image.",
+      true
+    );
     return;
   }
 
   const extensionFromName = file.name.includes(".")
     ? file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "")
     : "";
-  const extensionFromType = file.type.split("/")[1]?.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  const extensionFromType = file.type.split("/")[1]
+    ?.toLowerCase().replace(/[^a-z0-9]/g, "");
+
   const extension = extensionFromName || extensionFromType || "jpg";
+
   const filePath = currentUser.id + "/" + Date.now() + "-" +
     Math.random().toString(36).slice(2) + "." + extension;
 
@@ -683,24 +860,30 @@ $("uploadPhotoBtn").addEventListener("click", async () => {
       .getPublicUrl(filePath);
 
     const photoUrl = publicData?.publicUrl;
+
     if (!photoUrl) {
       throw new Error("The photo uploaded, but its public URL could not be created.");
     }
 
     await saveProfileData(photoUrl);
     $("profilePhoto").value = "";
-    showStatus("profileStatus", "Your photo uploaded successfully and your profile was saved!");
+    showStatus(
+      "profileStatus",
+      "Your photo uploaded successfully and your profile was saved!"
+    );
   } catch (error) {
-    showStatus("profileStatus",
+    showStatus(
+      "profileStatus",
       "Photo upload failed: " + (error.message || "Please try again."),
-      true);
+      true
+    );
   } finally {
     $("uploadPhotoBtn").disabled = false;
     $("uploadPhotoBtn").textContent = "Upload Photo";
   }
 });
 
-// Save or update the signed-in member's profile.
+// Save or update the member's profile.
 $("profileForm").addEventListener("submit", async event => {
   event.preventDefault();
   hideStatus("profileStatus");
@@ -713,18 +896,21 @@ $("profileForm").addEventListener("submit", async event => {
   const rawAvatarUrl = $("avatarUrl").value.trim();
 
   if (rawAvatarUrl && !validImageUrl(rawAvatarUrl)) {
-    showStatus("profileStatus",
-      "Please use a valid public image URL beginning with https://.", true);
+    showStatus(
+      "profileStatus",
+      "Please use a valid public image URL beginning with https://.",
+      true
+    );
     return;
   }
 
   $("saveProfileBtn").disabled = true;
+
   try {
     await saveProfileData(rawAvatarUrl ? validImageUrl(rawAvatarUrl) : "");
     showStatus("profileStatus", "Your profile was saved successfully!");
   } catch (error) {
-    showStatus("profileStatus",
-      "Could not save your profile: " + error.message, true);
+    showStatus("profileStatus", "Could not save your profile: " + error.message, true);
   } finally {
     $("saveProfileBtn").disabled = false;
   }
@@ -734,16 +920,24 @@ $("profileForm").addEventListener("submit", async event => {
 $("authForm").addEventListener("submit", async event => {
   event.preventDefault();
   hideStatus("authStatus");
+
   const email = $("email").value.trim();
   const password = $("password").value;
+
   $("signInBtn").disabled = true;
   $("signUpBtn").disabled = true;
+
   try {
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    const { data, error } = await client.auth.signInWithPassword({
+      email, password
+    });
+
     if (error) throw error;
+
     currentUser = data.user;
     updateAuthUI();
     await loadMyProfile();
+
     showStatus("authStatus", "You are signed in successfully.");
     await loadPosts();
   } catch (error) {
@@ -757,32 +951,49 @@ $("authForm").addEventListener("submit", async event => {
 // Create account.
 $("signUpBtn").addEventListener("click", async () => {
   hideStatus("authStatus");
+
   const email = $("email").value.trim();
   const password = $("password").value;
+
   if (!email || password.length < 6) {
-    showStatus("authStatus",
-      "Enter your email and a password of at least 6 characters.", true);
+    showStatus(
+      "authStatus",
+      "Enter your email and a password of at least 6 characters.",
+      true
+    );
     return;
   }
+
   $("signUpBtn").disabled = true;
   $("signInBtn").disabled = true;
+
   try {
     const { data, error } = await client.auth.signUp({
-      email, password,
+      email,
+      password,
       options: {
         emailRedirectTo: "https://kayblog1.github.io/kaybgram-new/"
       }
     });
+
     if (error) throw error;
+
     if (data.session && data.user) {
       currentUser = data.user;
       updateAuthUI();
       await loadMyProfile();
-      showStatus("authStatus", "Your account has been created and you are signed in.");
+
+      showStatus(
+        "authStatus",
+        "Your account has been created and you are signed in."
+      );
+
       await loadPosts();
     } else {
-      showStatus("authStatus",
-        "Account created. Check your email for the confirmation link, then sign in.");
+      showStatus(
+        "authStatus",
+        "Account created. Check your email for the confirmation link, then sign in."
+      );
     }
   } catch (error) {
     showStatus("authStatus", error.message || "Account creation failed.", true);
@@ -795,10 +1006,12 @@ $("signUpBtn").addEventListener("click", async () => {
 // Sign out.
 $("signOutBtn").addEventListener("click", async () => {
   const { error } = await client.auth.signOut();
+
   if (error) {
     showStatus("authStatus", error.message || "Could not sign out.", true);
     return;
   }
+
   currentUser = null;
   currentProfile = null;
   updateAuthUI();
@@ -810,25 +1023,33 @@ $("signOutBtn").addEventListener("click", async () => {
 $("postForm").addEventListener("submit", async event => {
   event.preventDefault();
   hideStatus("postStatus");
+
   if (!currentUser) {
     showStatus("postStatus", "Please sign in before publishing.", true);
     return;
   }
+
   const content = $("postContent").value.trim();
+
   if (!content) {
     showStatus("postStatus", "Write something before publishing.", true);
     return;
   }
+
   $("publishBtn").disabled = true;
+
   try {
     const { error } = await client.from("posts").insert({
       user_id: currentUser.id,
       username: usernameFor(currentUser),
       content
     });
+
     if (error) throw error;
+
     $("postContent").value = "";
     showStatus("postStatus", "Your post was published!");
+
     await loadPosts();
     $("feed").scrollIntoView({ behavior: "smooth" });
   } catch (error) {
@@ -842,6 +1063,7 @@ async function startKaybgram() {
   try {
     const { data, error } = await client.auth.getSession();
     if (error) throw error;
+
     currentUser = data.session?.user || null;
     updateAuthUI();
 
@@ -849,14 +1071,17 @@ async function startKaybgram() {
       try {
         await loadMyProfile();
       } catch (profileError) {
-        showStatus("profileStatus",
-          "Could not load your profile: " + profileError.message, true);
+        showStatus(
+          "profileStatus",
+          "Could not load your profile: " + profileError.message,
+          true
+        );
       }
     }
+
     await loadPosts();
   } catch (error) {
-    showStatus("feedStatus",
-      "Could not connect to Kaybgram: " + error.message, true);
+    showStatus("feedStatus", "Could not connect to Kaybgram: " + error.message, true);
   }
 }
 
@@ -868,8 +1093,11 @@ client.auth.onAuthStateChange((_event, session) => {
     loadMyProfile()
       .then(() => loadPosts())
       .catch(error => {
-        showStatus("profileStatus",
-          "Could not load your profile: " + error.message, true);
+        showStatus(
+          "profileStatus",
+          "Could not load your profile: " + error.message,
+          true
+        );
         loadPosts();
       });
   } else {
