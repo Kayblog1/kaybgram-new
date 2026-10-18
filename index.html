@@ -8,212 +8,100 @@
   <meta name="theme-color" content="#080d18">
   <style>
     :root {
-      --bg: #080d18;
-      --panel: #101a2b;
-      --panel2: #14223a;
-      --line: #263754;
-      --blue: #3984ff;
-      --blue2: #65a0ff;
-      --text: #f4f7ff;
-      --muted: #aab8d0;
-      --danger: #ff737e;
-      --success: #55d6a1;
+      --bg:#080d18;--panel:#101a2b;--panel2:#14223a;
+      --line:#263754;--blue:#3984ff;--blue2:#65a0ff;
+      --text:#f4f7ff;--muted:#aab8d0;--danger:#ff737e;
+      --success:#55d6a1;
     }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;color:var(--text);
+      background:radial-gradient(ellipse at top left,#102449 0,transparent 42%),var(--bg);
+      font-family:Arial,Helvetica,sans-serif;line-height:1.55
+    }
+    button,input,textarea,select{font:inherit}
+    button,a{-webkit-tap-highlight-color:transparent}
+    a{color:var(--blue2)}
+    .topbar{position:sticky;top:0;z-index:10;background:rgba(8,13,24,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+    .topbar-inner{max-width:1120px;margin:auto;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+    .brand{font-size:23px;font-weight:900;letter-spacing:1px;color:white;text-decoration:none}
+    .brand span{color:var(--blue2)}
+    nav{display:flex;gap:7px;flex-wrap:wrap}
+    nav a{color:#d7e3fa;text-decoration:none;padding:8px 10px;border-radius:9px;font-size:13px}
+    nav a:hover{background:#1a2c49}
+    .wrap{max-width:850px;margin:25px auto;padding:0 15px 45px}
+    .hero{padding:28px 24px;margin-bottom:17px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(130deg,#142b50,#101a2b 65%)}
+    .eyebrow{color:var(--blue2);font-size:12px;letter-spacing:2px;font-weight:bold}
+    h1{margin:8px 0;font-size:clamp(28px,5vw,42px);line-height:1.15}
+    h2{margin:0 0 12px;font-size:22px}
+    h3{margin:0 0 7px;font-size:17px}
+    p{margin-top:5px}
+    .muted,.small{color:var(--muted)}
+    .small{font-size:13px}
+    .card{background:rgba(16,26,43,.97);border:1px solid var(--line);border-radius:16px;padding:19px;margin-bottom:16px;min-width:0}
+    .hidden{display:none!important}
+    .field{display:block;width:100%;padding:12px 13px;color:var(--text);background:#091221;border:1px solid #304464;border-radius:10px;outline:none;margin:7px 0 13px}
+    .field:focus{border-color:var(--blue);box-shadow:0 0 0 2px #3984ff22}
+    textarea.field{min-height:95px;resize:vertical}
+    select.field{color-scheme:dark}
+    label{color:#dce7fa;font-size:13px;font-weight:700}
+    .btn{cursor:pointer;border:0;border-radius:10px;padding:10px 15px;font-weight:700;color:white;background:var(--blue);transition:.15s}
+    .btn:hover{filter:brightness(1.12)}
+    .btn:disabled{opacity:.55;cursor:wait}
+    .btn.secondary{background:#223653;border:1px solid #385071}
+    .btn.danger{background:#582b3a;border:1px solid #8a4255}
+    .btn.tiny{padding:7px 10px;font-size:12px}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .status{padding:10px 12px;margin:10px 0;border:1px solid #385071;border-radius:9px;color:#dce7fa;overflow-wrap:anywhere}
+    .status:empty{display:none}
+    .status.error{color:#ffd2d5;border-color:#8a4255;background:#351925}
+    .status.success{color:#c7ffe8;border-color:#247c5b;background:#102c25}
+    .profile-row{display:flex;gap:13px;align-items:center;min-width:0}
+    .avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;object-fit:cover;background:#233956;border:1px solid #3b5273}
+    .avatar.large{width:75px;height:75px;flex-basis:75px}
+    .profile-name{font-weight:800;overflow-wrap:anywhere}
+    .post{margin-bottom:15px}
+    .post-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .post-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:16px 0}
+    .post-actions{display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line);padding-top:12px}
+    .comment-list{display:grid;gap:8px;margin:12px 0}
+    .comment{background:#0a1424;border:1px solid #21324b;border-radius:10px;padding:10px;overflow-wrap:anywhere}
+    .comment-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .comment-form{display:flex;gap:8px;align-items:flex-start;margin-top:10px}
+    .comment-form textarea{min-height:43px;margin:0}
+    .notification{padding:13px;border:1px solid var(--line);background:#0b1525;border-radius:11px;margin:9px 0}
+    .notification.unread{border-color:#3984ff;background:#112342}
+    .conversation-list{max-height:390px;min-height:90px;overflow-y:auto;padding:12px;margin:14px 0;border-radius:12px;background:#091221;border:1px solid var(--line)}
+    .message-row{display:flex;margin:9px 0}
+    .message-row.mine{justify-content:flex-end}
+    .message-bubble{max-width:82%;padding:10px 13px;border-radius:14px 14px 14px 4px;background:#192943;overflow-wrap:anywhere;white-space:pre-wrap}
+    .message-row.mine .message-bubble{background:#1e5bc1;border-radius:14px 14px 4px 14px}
+    .message-meta{margin-top:5px;color:#c1d2ed;font-size:11px}
+    .message-compose{display:flex;gap:9px;align-items:flex-end}
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at top left, #102449 0, transparent 42%),
-        var(--bg);
-      font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.55;
-    }
-    button, input, textarea, select { font: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    a { color: var(--blue2); }
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(8,13,24,.96);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(12px);
-    }
-    .topbar-inner {
-      max-width: 1120px;
-      margin: auto;
-      padding: 13px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      font-size: 23px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: white;
-      text-decoration: none;
-    }
-    .brand span { color: var(--blue2); }
-    nav { display: flex; gap: 7px; flex-wrap: wrap; }
-    nav a {
-      color: #d7e3fa;
-      text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 9px;
-      font-size: 13px;
-    }
-    nav a:hover { background: #1a2c49; }
-    .wrap { max-width: 850px; margin: 25px auto; padding: 0 15px 45px; }
-    .hero {
-      padding: 28px 24px;
-      margin-bottom: 17px;
-      border: 1px solid var(--line);
-      border-radius: 19px;
-      background: linear-gradient(130deg, #142b50, #101a2b 65%);
-    }
-    .eyebrow {
-      color: var(--blue2);
-      font-size: 12px;
-      letter-spacing: 2px;
-      font-weight: bold;
-    }
-    h1 { margin: 8px 0; font-size: clamp(28px, 5vw, 42px); line-height: 1.15; }
-    h2 { margin: 0 0 12px; font-size: 22px; }
-    h3 { margin: 0 0 7px; font-size: 17px; }
-    p { margin-top: 5px; }
-    .muted, .small { color: var(--muted); }
-    .small { font-size: 13px; }
-    .card {
-      background: rgba(16,26,43,.97);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 19px;
-      margin-bottom: 16px;
-      min-width: 0;
-    }
-    .hidden { display: none !important; }
-    .field {
-      display: block;
-      width: 100%;
-      padding: 12px 13px;
-      color: var(--text);
-      background: #091221;
-      border: 1px solid #304464;
-      border-radius: 10px;
-      outline: none;
-      margin: 7px 0 13px;
-    }
-    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #3984ff22; }
-    textarea.field { min-height: 95px; resize: vertical; }
-    select.field { color-scheme: dark; }
-    label { color: #dce7fa; font-size: 13px; font-weight: 700; }
-    .btn {
-      cursor: pointer;
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 15px;
-      font-weight: 700;
-      color: white;
-      background: var(--blue);
-      transition: .15s;
-    }
-    .btn:hover { filter: brightness(1.12); }
-    .btn:disabled { opacity: .55; cursor: wait; }
-    .btn.secondary { background: #223653; border: 1px solid #385071; }
-    .btn.danger { background: #582b3a; border: 1px solid #8a4255; }
-    .btn.tiny { padding: 7px 10px; font-size: 12px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .status {
-      padding: 10px 12px;
-      margin: 10px 0;
-      border: 1px solid #385071;
-      border-radius: 9px;
-      color: #dce7fa;
-      overflow-wrap: anywhere;
-    }
-    .status:empty { display: none; }
-    .status.error { color: #ffd2d5; border-color: #8a4255; background: #351925; }
-    .status.success { color: #c7ffe8; border-color: #247c5b; background: #102c25; }
-    .profile-row { display: flex; gap: 13px; align-items: center; min-width: 0; }
-    .avatar {
-      width: 46px;
-      height: 46px;
-      flex: 0 0 46px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #233956;
-      border: 1px solid #3b5273;
-    }
-    .avatar.large { width: 75px; height: 75px; flex-basis: 75px; }
-    .profile-name { font-weight: 800; overflow-wrap: anywhere; }
-    .post { margin-bottom: 15px; }
-    .post-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-    .post-content { white-space: pre-wrap; overflow-wrap: anywhere; margin: 16px 0; }
-    .post-actions { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); padding-top: 12px; }
-    .comment-list { display: grid; gap: 8px; margin: 12px 0; }
-    .comment {
-      background: #0a1424;
-      border: 1px solid #21324b;
-      border-radius: 10px;
-      padding: 10px;
-      overflow-wrap: anywhere;
-    }
-    .comment-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .comment-form { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; }
-    .comment-form textarea { min-height: 43px; margin: 0; }
-    .count { color: var(--blue2); font-size: 12px; }
-    .notification {
-      padding: 13px;
-      border: 1px solid var(--line);
-      background: #0b1525;
-      border-radius: 11px;
-      margin: 9px 0;
-    }
-    .notification.unread { border-color: #3984ff; background: #112342; }
-    .conversation-list {
-      max-height: 390px;
-      min-height: 90px;
-      overflow-y: auto;
-      padding: 12px;
-      margin: 14px 0;
-      border-radius: 12px;
-      background: #091221;
-      border: 1px solid var(--line);
-    }
-    .message-row { display: flex; margin: 9px 0; }
-    .message-row.mine { justify-content: flex-end; }
-    .message-bubble {
-      max-width: 82%;
-      padding: 10px 13px;
-      border-radius: 14px 14px 14px 4px;
-      background: #192943;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-    .message-row.mine .message-bubble {
-      background: #1e5bc1;
-      border-radius: 14px 14px 4px 14px;
-    }
-    .message-meta { margin-top: 5px; color: #c1d2ed; font-size: 11px; }
-    .message-compose { display: flex; gap: 9px; align-items: flex-end; }
-    .message-compose textarea { margin-bottom: 0; }
-    footer { text-align: center; color: var(--muted); padding: 25px 10px; font-size: 12px; }
-    @media (max-width: 560px) {
-      .topbar-inner { align-items: flex-start; }
-      nav { width: 100%; }
-      nav a { padding: 7px 8px; }
-      .wrap { margin-top: 14px; padding: 0 10px 30px; }
-      .card { padding: 14px; }
-      .hero { padding: 22px 17px; }
-      .comment-form, .message-compose { flex-direction: column; }
-      .comment-form .btn, .message-compose .btn { width: 100%; }
-      .message-bubble { max-width: 92%; }
+    /* STORIES */
+    .stories-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-top:14px}
+    .story-card{position:relative;min-height:155px;padding:15px;border-radius:15px;border:1px solid #35517b;background:linear-gradient(145deg,#1a3764,#101a2b);display:flex;flex-direction:column;justify-content:space-between;overflow-wrap:anywhere}
+    .story-card.own{background:linear-gradient(145deg,#193e68,#10233e);border-color:#3984ff}
+    .story-top{display:flex;align-items:center;gap:8px;min-width:0}
+    .story-top .avatar{width:36px;height:36px;flex-basis:36px}
+    .story-content{white-space:pre-wrap;overflow-wrap:anywhere;margin:13px 0;flex:1}
+    .story-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+    .story-expiry{font-size:11px;color:#c0d2ef}
+    .story-compose-note{font-size:12px;color:var(--muted);margin-top:5px}
+    footer{text-align:center;color:var(--muted);padding:25px 10px;font-size:12px}
+    @media(max-width:560px){
+      .topbar-inner{align-items:flex-start}
+      nav{width:100%}
+      nav a{padding:7px 8px}
+      .wrap{margin-top:14px;padding:0 10px 30px}
+      .card{padding:14px}
+      .hero{padding:22px 17px}
+      .comment-form,.message-compose{flex-direction:column}
+      .comment-form .btn,.message-compose .btn{width:100%}
+      .message-bubble{max-width:92%}
+      .stories-row{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
   </style>
 </head>
@@ -223,6 +111,7 @@
       <a class="brand" href="#home">KAYB<span>GRAM</span></a>
       <nav aria-label="Main navigation">
         <a href="#home">Home</a>
+        <a href="#stories">✨ Stories</a>
         <a href="#myProfile">My Profile</a>
         <a href="#create">Create</a>
         <a href="#feed">Community</a>
@@ -238,6 +127,33 @@
       <div class="eyebrow">YOUR PEOPLE. YOUR WORLD.</div>
       <h1>A little closer.<br>A lot more connected.</h1>
       <p class="muted">A fresh home for your social life. Share your world, meet people, and stay connected.</p>
+    </section>
+
+    <!-- STORIES -->
+    <section class="card" id="stories">
+      <div class="post-head">
+        <div>
+          <h2>✨ Kaybgram Stories</h2>
+          <p class="muted small">Share a quick thought with your community. Stories disappear after 24 hours.</p>
+        </div>
+        <button class="btn secondary tiny" id="refreshStories" type="button">Refresh</button>
+      </div>
+      <div id="storiesStatus" class="status" role="status"></div>
+
+      <div id="storyComposer" class="hidden">
+        <form id="storyForm">
+          <label for="storyText">Create your Story</label>
+          <textarea class="field" id="storyText" maxlength="500" placeholder="What's happening in your world? (500 characters maximum)" required></textarea>
+          <div class="post-head">
+            <span class="count" id="storyCharCount">0 / 500</span>
+            <button class="btn" id="publishStoryBtn" type="submit">Publish Story</button>
+          </div>
+        </form>
+      </div>
+      <p id="storySignInHint" class="muted small">Sign in to publish your own Story. You can read active Stories below.</p>
+      <div id="storiesList" class="stories-row">
+        <p class="muted small">Loading Stories...</p>
+      </div>
     </section>
 
     <section class="card" id="account">
@@ -302,16 +218,12 @@
       <p class="muted small">Choose a Kaybgram member to start a private conversation. Only the people in a conversation can read its messages.</p>
       <div id="messagesStatus" class="status" role="status"></div>
       <label for="messageMember">Choose a member</label>
-      <select class="field" id="messageMember">
-        <option value="">Loading members...</option>
-      </select>
+      <select class="field" id="messageMember"><option value="">Loading members...</option></select>
       <div class="actions">
         <button class="btn secondary tiny" id="refreshMembers" type="button">Refresh members</button>
         <button class="btn secondary tiny" id="refreshConversation" type="button">Refresh conversation</button>
       </div>
-      <div class="conversation-list" id="conversation" aria-live="polite">
-        <p class="muted small">Choose a member to view your conversation.</p>
-      </div>
+      <div class="conversation-list" id="conversation" aria-live="polite"><p class="muted small">Choose a member to view your conversation.</p></div>
       <form id="messageForm">
         <label for="messageText">Write a private message</label>
         <div class="message-compose">
@@ -332,9 +244,7 @@
         </div>
         <div id="feedStatus" class="status" role="status"></div>
       </div>
-      <div id="postsList">
-        <div class="card"><p class="muted">Loading community posts...</p></div>
-      </div>
+      <div id="postsList"><div class="card"><p class="muted">Loading community posts...</p></div></div>
     </section>
   </main>
 
@@ -348,7 +258,7 @@
     const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
     let currentUser = null;
     let currentProfile = null;
     let selectedMemberName = "";
@@ -368,9 +278,7 @@
       el.className = "status" + (type ? " " + type : "");
     }
 
-    function hideStatus(id) {
-      showStatus(id, "");
-    }
+    function hideStatus(id) { showStatus(id, ""); }
 
     function formatDate(value) {
       if (!value) return "";
@@ -380,9 +288,7 @@
     }
 
     function usernameFor(profile, fallback = "Kaybgram member") {
-      return profile && profile.display_name
-        ? profile.display_name
-        : fallback;
+      return profile && profile.display_name ? profile.display_name : fallback;
     }
 
     function avatarUrl(profile) {
@@ -407,6 +313,8 @@
       $("signOutBtn").classList.toggle("hidden", !signedIn);
       $("myProfile").classList.toggle("hidden", !signedIn);
       $("create").classList.toggle("hidden", !signedIn);
+      $("storyComposer").classList.toggle("hidden", !signedIn);
+      $("storySignInHint").classList.toggle("hidden", signedIn);
       $("signedInAs").textContent = signedIn
         ? "Signed in as " + (currentUser.email || "Kaybgram member")
         : "You are currently signed out.";
@@ -420,11 +328,8 @@
       if (!currentUser || !recipientId || recipientId === currentUser.id) return;
       try {
         const { error } = await client.from("notifications").insert({
-          recipient_id: recipientId,
-          actor_id: currentUser.id,
-          type,
-          post_id: postId,
-          message
+          recipient_id: recipientId, actor_id: currentUser.id, type,
+          post_id: postId, message
         });
         if (error) console.warn("Notification was not saved:", error.message);
       } catch (error) {
@@ -441,12 +346,10 @@
       list.replaceChildren(makeElement("p", "muted small", "Loading notifications..."));
       hideStatus("notificationsStatus");
 
-      const { data, error } = await client
-        .from("notifications")
+      const { data, error } = await client.from("notifications")
         .select("id,recipient_id,actor_id,type,post_id,message,is_read,created_at")
         .eq("recipient_id", currentUser.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
+        .order("created_at", { ascending: false }).limit(50);
 
       if (error) {
         list.replaceChildren();
@@ -466,21 +369,17 @@
       const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
       let profileMap = {};
       if (actorIds.length) {
-        const { data: profiles } = await client
-          .from("profiles")
-          .select("user_id,display_name,avatar_url")
-          .in("user_id", actorIds);
+        const { data: profiles } = await client.from("profiles")
+          .select("user_id,display_name,avatar_url").in("user_id", actorIds);
         (profiles || []).forEach(p => profileMap[p.user_id] = p);
       }
 
       list.replaceChildren();
       notifications.forEach(n => {
         const item = makeElement("div", "notification" + (n.is_read ? "" : " unread"));
-        const actor = profileMap[n.actor_id];
-        const name = usernameFor(actor);
-        const message = n.message || (name + " interacted with you on Kaybgram.");
+        const name = usernameFor(profileMap[n.actor_id]);
         item.append(
-          makeElement("div", "profile-name", message),
+          makeElement("div", "profile-name", n.message || (name + " interacted with you on Kaybgram.")),
           makeElement("div", "small muted", formatDate(n.created_at))
         );
         list.append(item);
@@ -488,11 +387,8 @@
 
       const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
       if (unreadIds.length) {
-        const { error: updateError } = await client
-          .from("notifications")
-          .update({ is_read: true })
-          .in("id", unreadIds)
-          .eq("recipient_id", currentUser.id);
+        const { error: updateError } = await client.from("notifications")
+          .update({ is_read: true }).in("id", unreadIds).eq("recipient_id", currentUser.id);
         if (!updateError) {
           notificationUnreadCount = 0;
           $("notificationCount").textContent = "";
@@ -502,11 +398,9 @@
 
     async function loadMyProfile() {
       if (!currentUser) return;
-      const { data, error } = await client
-        .from("profiles")
+      const { data, error } = await client.from("profiles")
         .select("user_id,display_name,bio,avatar_url")
-        .eq("user_id", currentUser.id)
-        .maybeSingle();
+        .eq("user_id", currentUser.id).maybeSingle();
 
       if (error) {
         showStatus("profileStatus", "Could not load profile: " + error.message, "error");
@@ -516,8 +410,7 @@
       currentProfile = data || {
         user_id: currentUser.id,
         display_name: currentUser.email ? currentUser.email.split("@")[0] : "Kaybgram member",
-        bio: "",
-        avatar_url: ""
+        bio: "", avatar_url: ""
       };
 
       $("displayName").value = currentProfile.display_name || "";
@@ -529,13 +422,10 @@
 
     async function saveProfileData(displayName, bio, avatarUrlValue) {
       const profileData = {
-        user_id: currentUser.id,
-        display_name: displayName,
-        bio,
-        avatar_url: avatarUrlValue || ""
+        user_id: currentUser.id, display_name: displayName,
+        bio, avatar_url: avatarUrlValue || ""
       };
-      const { error } = await client
-        .from("profiles")
+      const { error } = await client.from("profiles")
         .upsert(profileData, { onConflict: "user_id" });
       if (error) throw error;
       currentProfile = profileData;
@@ -548,29 +438,25 @@
 
       const extension = (file.name.split(".").pop() || "jpg").replace(/[^a-zA-Z0-9]/g, "");
       const path = currentUser.id + "/" + Date.now() + "." + extension;
-      const { error } = await client.storage
-        .from("profile-photos")
+      const { error } = await client.storage.from("profile-photos")
         .upload(path, file, { upsert: true, contentType: file.type });
 
       if (error) throw new Error("Photo upload failed. Check that the profile-photos storage bucket exists and is public. " + error.message);
-
       const { data } = client.storage.from("profile-photos").getPublicUrl(path);
       return data.publicUrl;
     }
 
-    $("profileForm").addEventListener("submit", async (event) => {
+    $("profileForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!currentUser) return showStatus("profileStatus", "Please sign in first.", "error");
 
       const button = $("saveProfileBtn");
       button.disabled = true;
       hideStatus("profileStatus");
-
       try {
         const displayName = $("displayName").value.trim();
         const bio = $("bio").value.trim();
         if (!displayName) throw new Error("Please enter a display name.");
-
         const photo = $("profilePhoto").files[0];
         const newAvatarUrl = photo ? await uploadProfilePhoto(photo) : (currentProfile?.avatar_url || "");
         await saveProfileData(displayName, bio, newAvatarUrl);
@@ -578,6 +464,7 @@
         await loadMyProfile();
         showStatus("profileStatus", "Your profile has been saved.", "success");
         await loadPosts();
+        await loadStories();
       } catch (error) {
         showStatus("profileStatus", error.message || "Could not save your profile.", "error");
       } finally {
@@ -585,16 +472,128 @@
       }
     });
 
+    // STORIES: Load active Stories and the authors' profiles.
+    async function loadStories() {
+      const list = $("storiesList");
+      list.replaceChildren(makeElement("p", "muted small", "Loading Stories..."));
+      hideStatus("storiesStatus");
+
+      const now = new Date().toISOString();
+      const { data: stories, error } = await client.from("stories")
+        .select("id,user_id,content,created_at,expires_at")
+        .gt("expires_at", now)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) {
+        list.replaceChildren();
+        showStatus("storiesStatus", "Could not load Stories: " + error.message, "error");
+        return;
+      }
+
+      if (!stories || !stories.length) {
+        list.replaceChildren(makeElement("p", "muted small", "No active Stories yet. Be the first to share one!"));
+        return;
+      }
+
+      const userIds = [...new Set(stories.map(s => s.user_id).filter(Boolean))];
+      let profileMap = {};
+      if (userIds.length) {
+        const { data: profiles, error: profileError } = await client.from("profiles")
+          .select("user_id,display_name,bio,avatar_url")
+          .in("user_id", userIds);
+        if (profileError) console.warn("Story profiles could not load:", profileError.message);
+        (profiles || []).forEach(profile => profileMap[profile.user_id] = profile);
+      }
+
+      list.replaceChildren();
+      stories.forEach(story => {
+        const profile = profileMap[story.user_id] || null;
+        const own = !!currentUser && story.user_id === currentUser.id;
+        const card = makeElement("article", "story-card" + (own ? " own" : ""));
+        const top = makeElement("div", "story-top");
+        const avatar = makeElement("img", "avatar");
+        setAvatar(avatar, profile);
+        const nameBox = makeElement("div");
+        nameBox.append(
+          makeElement("div", "profile-name", own ? "Your Story" : usernameFor(profile)),
+          makeElement("div", "small muted", formatDate(story.created_at))
+        );
+        top.append(avatar, nameBox);
+
+        const content = makeElement("div", "story-content", story.content);
+        const footer = makeElement("div", "story-footer");
+        const expiry = makeElement("span", "story-expiry", "Expires " + formatDate(story.expires_at));
+        footer.append(expiry);
+
+        if (own) {
+          const deleteButton = makeElement("button", "btn danger tiny", "Delete");
+          deleteButton.type = "button";
+          deleteButton.addEventListener("click", async () => {
+            if (!confirm("Delete this Story?")) return;
+            deleteButton.disabled = true;
+            const { error: deleteError } = await client.from("stories")
+              .delete().eq("id", story.id).eq("user_id", currentUser.id);
+            if (deleteError) {
+              showStatus("storiesStatus", "Could not delete Story: " + deleteError.message, "error");
+              deleteButton.disabled = false;
+            } else {
+              showStatus("storiesStatus", "Your Story has been deleted.", "success");
+              await loadStories();
+            }
+          });
+          footer.append(deleteButton);
+        }
+
+        card.append(top, content, footer);
+        list.append(card);
+      });
+    }
+
+    $("storyText").addEventListener("input", () => {
+      $("storyCharCount").textContent = $("storyText").value.length + " / 500";
+    });
+
+    $("storyForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!currentUser) return showStatus("storiesStatus", "Please sign in to publish a Story.", "error");
+
+      const content = $("storyText").value.trim();
+      if (!content) return showStatus("storiesStatus", "Write something before publishing.", "error");
+      if (content.length > 500) return showStatus("storiesStatus", "Stories must be 500 characters or fewer.", "error");
+
+      const button = $("publishStoryBtn");
+      button.disabled = true;
+      hideStatus("storiesStatus");
+      try {
+        // Supabase supplies created_at and expires_at defaults.
+        const { error } = await client.from("stories").insert({
+          user_id: currentUser.id,
+          content
+        });
+        if (error) throw error;
+
+        $("storyText").value = "";
+        $("storyCharCount").textContent = "0 / 500";
+        showStatus("storiesStatus", "Your Story has been published!", "success");
+        await loadStories();
+      } catch (error) {
+        showStatus("storiesStatus", "Could not publish Story: " + error.message, "error");
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("refreshStories").addEventListener("click", loadStories);
+
     async function loadPosts() {
       const list = $("postsList");
       list.replaceChildren(makeElement("div", "card", "Loading community posts..."));
       hideStatus("feedStatus");
 
-      const { data: posts, error } = await client
-        .from("posts")
+      const { data: posts, error } = await client.from("posts")
         .select("id,user_id,content,created_at")
-        .order("created_at", { ascending: false })
-        .limit(50);
+        .order("created_at", { ascending: false }).limit(50);
 
       if (error) {
         list.replaceChildren();
@@ -609,13 +608,14 @@
 
       const postIds = posts.map(p => p.id);
       const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
-      let profiles = [], likes = [], comments = [], follows = [];
 
       const profilePromise = userIds.length
         ? client.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id", userIds)
         : Promise.resolve({ data: [] });
       const likesPromise = client.from("likes").select("post_id,user_id").in("post_id", postIds);
-      const commentsPromise = client.from("comments").select("id,post_id,user_id,content,created_at").in("post_id", postIds).order("created_at", { ascending: true });
+      const commentsPromise = client.from("comments")
+        .select("id,post_id,user_id,content,created_at").in("post_id", postIds)
+        .order("created_at", { ascending: true });
       const followsPromise = currentUser
         ? client.from("follows").select("follower_id,following_id").eq("follower_id", currentUser.id)
         : Promise.resolve({ data: [] });
@@ -624,10 +624,10 @@
         profilePromise, likesPromise, commentsPromise, followsPromise
       ]);
 
-      profiles = profileResult.data || [];
-      likes = likeResult.data || [];
-      comments = commentResult.data || [];
-      follows = followResult.data || [];
+      const profiles = profileResult.data || [];
+      const likes = likeResult.data || [];
+      const comments = commentResult.data || [];
+      const follows = followResult.data || [];
 
       if (likeResult.error) console.warn("Likes could not load:", likeResult.error.message);
       if (commentResult.error) console.warn("Comments could not load:", commentResult.error.message);
@@ -637,15 +637,12 @@
       profiles.forEach(p => profileMap[p.user_id] = p);
       list.replaceChildren();
 
-      posts.forEach(post => {
-        list.append(createPostCard(
-          post,
-          profileMap[post.user_id],
-          likes.filter(l => l.post_id === post.id),
-          comments.filter(c => c.post_id === post.id),
-          follows.some(f => f.following_id === post.user_id)
-        ));
-      });
+      posts.forEach(post => list.append(createPostCard(
+        post, profileMap[post.user_id],
+        likes.filter(l => l.post_id === post.id),
+        comments.filter(c => c.post_id === post.id),
+        follows.some(f => f.following_id === post.user_id)
+      )));
     }
 
     function createPostCard(post, profile, postLikes, postComments, isFollowing) {
@@ -670,18 +667,16 @@
           followBtn.disabled = true;
           try {
             if (isFollowing) {
-              const { error } = await client.from("follows")
-                .delete()
-                .eq("follower_id", currentUser.id)
-                .eq("following_id", post.user_id);
+              const { error } = await client.from("follows").delete()
+                .eq("follower_id", currentUser.id).eq("following_id", post.user_id);
               if (error) throw error;
             } else {
               const { error } = await client.from("follows").insert({
-                follower_id: currentUser.id,
-                following_id: post.user_id
+                follower_id: currentUser.id, following_id: post.user_id
               });
               if (error) throw error;
-              await createNotification(post.user_id, "follow", usernameFor(currentProfile, currentUser.email) + " started following you.");
+              await createNotification(post.user_id, "follow",
+                usernameFor(currentProfile, currentUser.email) + " started following you.");
             }
             await loadPosts();
           } catch (error) {
@@ -698,13 +693,12 @@
         deleteBtn.addEventListener("click", async () => {
           if (!confirm("Delete this post?")) return;
           deleteBtn.disabled = true;
-          const { error } = await client.from("posts").delete().eq("id", post.id).eq("user_id", currentUser.id);
+          const { error } = await client.from("posts").delete()
+            .eq("id", post.id).eq("user_id", currentUser.id);
           if (error) {
             showStatus("feedStatus", "Could not delete post: " + error.message, "error");
             deleteBtn.disabled = false;
-          } else {
-            await loadPosts();
-          }
+          } else await loadPosts();
         });
         controls.append(deleteBtn);
       }
@@ -713,7 +707,8 @@
       const content = makeElement("div", "post-content", post.content || "");
       const actions = makeElement("div", "post-actions");
       const userLiked = !!(currentUser && postLikes.some(l => l.user_id === currentUser.id));
-      const likeBtn = makeElement("button", "btn secondary tiny", (userLiked ? "♥ Unlike" : "♡ Like") + " (" + postLikes.length + ")");
+      const likeBtn = makeElement("button", "btn secondary tiny",
+        (userLiked ? "♥ Unlike" : "♡ Like") + " (" + postLikes.length + ")");
       likeBtn.type = "button";
       likeBtn.addEventListener("click", async () => {
         if (!currentUser) return showStatus("feedStatus", "Sign in to like posts.", "error");
@@ -725,11 +720,11 @@
             if (error) throw error;
           } else {
             const { error } = await client.from("likes").insert({
-              post_id: post.id,
-              user_id: currentUser.id
+              post_id: post.id, user_id: currentUser.id
             });
             if (error) throw error;
-            await createNotification(post.user_id, "like", usernameFor(currentProfile, currentUser.email) + " liked your post.", post.id);
+            await createNotification(post.user_id, "like",
+              usernameFor(currentProfile, currentUser.email) + " liked your post.", post.id);
           }
           await loadPosts();
         } catch (error) {
@@ -750,9 +745,7 @@
           } else if (navigator.clipboard) {
             await navigator.clipboard.writeText(shareText + "\n" + location.href);
             showStatus("feedStatus", "Post text copied. You can share it now.", "success");
-          } else {
-            prompt("Copy this post to share:", shareText);
-          }
+          } else prompt("Copy this post to share:", shareText);
         } catch (error) {
           if (error.name !== "AbortError") showStatus("feedStatus", "Could not share this post.", "error");
         }
@@ -761,18 +754,18 @@
 
       const commentsArea = makeElement("div", "hidden");
       commentToggle.addEventListener("click", () => commentsArea.classList.toggle("hidden"));
-
       const commentsList = makeElement("div", "comment-list");
+
       if (!postComments.length) {
         commentsList.append(makeElement("p", "muted small", "No comments yet."));
       } else {
         postComments.forEach(comment => {
           const item = makeElement("div", "comment");
           const top = makeElement("div", "comment-top");
-          const commentProfile = makeElement("span", "profile-name", "Kaybgram member");
-          top.append(commentProfile);
-          const commentDate = makeElement("span", "small muted", formatDate(comment.created_at));
-          top.append(commentDate);
+          top.append(
+            makeElement("span", "profile-name", "Kaybgram member"),
+            makeElement("span", "small muted", formatDate(comment.created_at))
+          );
           item.append(top, makeElement("div", "", comment.content || ""));
 
           if (currentUser && comment.user_id === currentUser.id) {
@@ -800,7 +793,8 @@
       const commentSubmit = makeElement("button", "btn", "Comment");
       commentSubmit.type = "submit";
       commentForm.append(commentInput, commentSubmit);
-      commentForm.addEventListener("submit", async (event) => {
+
+      commentForm.addEventListener("submit", async event => {
         event.preventDefault();
         if (!currentUser) return showStatus("feedStatus", "Sign in to comment.", "error");
         const text = commentInput.value.trim();
@@ -808,12 +802,11 @@
         commentSubmit.disabled = true;
         try {
           const { error } = await client.from("comments").insert({
-            post_id: post.id,
-            user_id: currentUser.id,
-            content: text
+            post_id: post.id, user_id: currentUser.id, content: text
           });
           if (error) throw error;
-          await createNotification(post.user_id, "comment", usernameFor(currentProfile, currentUser.email) + " commented on your post.", post.id);
+          await createNotification(post.user_id, "comment",
+            usernameFor(currentProfile, currentUser.email) + " commented on your post.", post.id);
           await loadPosts();
         } catch (error) {
           showStatus("feedStatus", "Could not add comment: " + error.message, "error");
@@ -828,7 +821,7 @@
       return card;
     }
 
-    $("authForm").addEventListener("submit", async (event) => {
+    $("authForm").addEventListener("submit", async event => {
       event.preventDefault();
       const email = $("authEmail").value.trim();
       const password = $("authPassword").value;
@@ -861,11 +854,8 @@
       try {
         const { data, error } = await client.auth.signUp({ email, password });
         if (error) throw error;
-        if (data.session) {
-          showStatus("authStatus", "Account created. You are signed in.", "success");
-        } else {
-          showStatus("authStatus", "Account created. Check your email to confirm it, then sign in.", "success");
-        }
+        if (data.session) showStatus("authStatus", "Account created. You are signed in.", "success");
+        else showStatus("authStatus", "Account created. Check your email to confirm it, then sign in.", "success");
       } catch (error) {
         showStatus("authStatus", "Could not create account: " + error.message, "error");
       } finally {
@@ -883,7 +873,7 @@
       }
     });
 
-    $("postForm").addEventListener("submit", async (event) => {
+    $("postForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!currentUser) return showStatus("postStatus", "Please sign in first.", "error");
       const content = $("caption").value.trim();
@@ -893,8 +883,7 @@
       hideStatus("postStatus");
       try {
         const { error } = await client.from("posts").insert({
-          user_id: currentUser.id,
-          content
+          user_id: currentUser.id, content
         });
         if (error) throw error;
         $("caption").value = "";
@@ -919,10 +908,8 @@
       select.replaceChildren(makeElement("option", "", "Loading members..."));
       hideStatus("messagesStatus");
 
-      const { data, error } = await client
-        .from("profiles")
-        .select("user_id,display_name,bio,avatar_url")
-        .order("display_name", { ascending: true });
+      const { data, error } = await client.from("profiles")
+        .select("user_id,display_name,bio,avatar_url").order("display_name", { ascending: true });
 
       if (error) {
         select.replaceChildren(makeElement("option", "", "Could not load members"));
@@ -946,12 +933,9 @@
         select.append(option);
       });
 
-      if (oldSelection && members.some(m => m.user_id === oldSelection)) {
-        select.value = oldSelection;
-      }
+      if (oldSelection && members.some(m => m.user_id === oldSelection)) select.value = oldSelection;
       if (select.value) {
-        const chosen = members.find(m => m.user_id === select.value);
-        selectedMemberName = usernameFor(chosen);
+        selectedMemberName = usernameFor(members.find(m => m.user_id === select.value));
         await loadConversation();
       } else {
         $("conversation").replaceChildren(makeElement("p", "muted small", "Choose a member to view your conversation."));
@@ -973,16 +957,10 @@
       hideStatus("messagesStatus");
 
       const [sentResult, receivedResult] = await Promise.all([
-        client.from("messages")
-          .select("id,sender_id,recipient_id,content,created_at,read_at")
-          .eq("sender_id", currentUser.id)
-          .eq("recipient_id", recipientId)
-          .order("created_at", { ascending: true }),
-        client.from("messages")
-          .select("id,sender_id,recipient_id,content,created_at,read_at")
-          .eq("sender_id", recipientId)
-          .eq("recipient_id", currentUser.id)
-          .order("created_at", { ascending: true })
+        client.from("messages").select("id,sender_id,recipient_id,content,created_at,read_at")
+          .eq("sender_id", currentUser.id).eq("recipient_id", recipientId).order("created_at", { ascending: true }),
+        client.from("messages").select("id,sender_id,recipient_id,content,created_at,read_at")
+          .eq("sender_id", recipientId).eq("recipient_id", currentUser.id).order("created_at", { ascending: true })
       ]);
 
       if (sentResult.error || receivedResult.error) {
@@ -1012,53 +990,34 @@
         });
       }
 
-      const unreadIds = messages
-        .filter(m => m.recipient_id === currentUser.id && !m.read_at)
-        .map(m => m.id);
-
+      const unreadIds = messages.filter(m => m.recipient_id === currentUser.id && !m.read_at).map(m => m.id);
       if (unreadIds.length) {
-        const { error } = await client.from("messages")
-          .update({ read_at: new Date().toISOString() })
-          .in("id", unreadIds)
-          .eq("recipient_id", currentUser.id);
+        const { error } = await client.from("messages").update({ read_at: new Date().toISOString() })
+          .in("id", unreadIds).eq("recipient_id", currentUser.id);
         if (error) console.warn("Could not mark messages as read:", error.message);
       }
-
       conversation.scrollTop = conversation.scrollHeight;
     }
 
     $("messageMember").addEventListener("change", loadConversation);
-
-    $("refreshMembers").addEventListener("click", async () => {
-      await loadMembers();
-    });
-
+    $("refreshMembers").addEventListener("click", loadMembers);
     $("refreshConversation").addEventListener("click", loadConversation);
 
-    $("messageForm").addEventListener("submit", async (event) => {
+    $("messageForm").addEventListener("submit", async event => {
       event.preventDefault();
-      if (!currentUser) {
-        showStatus("messagesStatus", "Please sign in first.", "error");
-        return;
-      }
+      if (!currentUser) return showStatus("messagesStatus", "Please sign in first.", "error");
 
       const recipientId = $("messageMember").value;
       const content = $("messageText").value.trim();
-      if (!recipientId) {
-        showStatus("messagesStatus", "Choose a member before sending a message.", "error");
-        return;
-      }
+      if (!recipientId) return showStatus("messagesStatus", "Choose a member before sending a message.", "error");
       if (!content) return;
 
       const button = $("sendMessageBtn");
       button.disabled = true;
       hideStatus("messagesStatus");
-
       try {
         const { error } = await client.from("messages").insert({
-          sender_id: currentUser.id,
-          recipient_id: recipientId,
-          content
+          sender_id: currentUser.id, recipient_id: recipientId, content
         });
         if (error) throw error;
         $("messageText").value = "";
@@ -1074,9 +1033,9 @@
     $("refreshFeed").addEventListener("click", loadPosts);
     $("refreshNotifications").addEventListener("click", loadNotifications);
 
-    // Show a section when its navigation link is used.
+    // Navigation
     document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-      link.addEventListener("click", async (event) => {
+      link.addEventListener("click", async event => {
         const targetId = link.getAttribute("href").slice(1);
         const target = $(targetId);
         if (!target) return;
@@ -1088,11 +1047,10 @@
           return;
         }
 
-        if (["notifications", "messages", "myProfile", "create"].includes(targetId)) {
-          target.classList.remove("hidden");
-        }
+        if (["notifications", "messages", "myProfile", "create"].includes(targetId)) target.classList.remove("hidden");
         if (targetId === "notifications") await loadNotifications();
         if (targetId === "messages") await loadMembers();
+        if (targetId === "stories") await loadStories();
       });
     });
 
@@ -1101,13 +1059,8 @@
       if (error) console.warn("Session check:", error.message);
       currentUser = data?.session?.user || null;
       updateAuthUI();
-
-      if (currentUser) {
-        await loadMyProfile();
-        await loadPosts();
-      } else {
-        await loadPosts();
-      }
+      if (currentUser) await loadMyProfile();
+      await Promise.all([loadPosts(), loadStories()]);
     }
 
     client.auth.onAuthStateChange(async (_event, session) => {
@@ -1115,14 +1068,14 @@
       updateAuthUI();
       if (currentUser) {
         await loadMyProfile();
-        await loadPosts();
+        await Promise.all([loadPosts(), loadStories()]);
       } else {
         currentProfile = null;
         $("myDisplayName").textContent = "Your profile";
         $("myBioPreview").textContent = "Sign in to edit your profile.";
         $("myAvatar").src = "https://placehold.co/100x100/14223a/ffffff?text=K";
         $("postsList").replaceChildren(makeElement("div", "card muted", "Sign in to publish posts, like, comment, and follow members."));
-        await loadPosts();
+        await Promise.all([loadPosts(), loadStories()]);
       }
     });
 
