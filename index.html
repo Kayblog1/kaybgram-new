@@ -2,1322 +2,1131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080d18">
-<title>Kaybgram — Connect your world</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --bg:#080d18;--panel:#111a2b;--panel2:#172239;
-  --blue:#3985ff;--blue2:#1765e8;--text:#f3f6ff;
-  --muted:#9ba9c2;--border:#26334a;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-header{background:#0c1322;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.topbar{max-width:1100px;margin:auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.brand{font-size:24px;font-weight:900;letter-spacing:-1px;color:white}
-.brand span{color:var(--blue)}
-nav{display:flex;gap:8px;flex-wrap:wrap}
-nav a{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:8px;font-size:14px}
-nav a:hover{background:var(--panel2);color:white}
-.page{max-width:1100px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:20px;align-items:start}
-.main,.sidebar{display:flex;flex-direction:column;gap:18px;min-width:0}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;min-width:0}
-.hero{background:linear-gradient(135deg,#142b50,#111a2b 75%);padding:26px 22px}
-.eyebrow{color:#83b4ff;font-size:12px;font-weight:bold;letter-spacing:2px}
-h1{font-size:clamp(25px,4vw,36px);line-height:1.15;margin:10px 0}
-h2{font-size:19px;margin:0 0 12px}
-p{overflow-wrap:anywhere}
-.muted{color:var(--muted)}
-.small{font-size:13px}
-.field{display:block;width:100%;margin:10px 0;padding:13px 14px;color:white;background:#0b1220;border:1px solid var(--border);border-radius:10px;outline:none}
-.field:focus{border-color:var(--blue)}
-textarea.field{resize:vertical;min-height:90px}
-.btn{border:0;border-radius:10px;padding:11px 15px;color:white;background:var(--blue);font-weight:bold}
-.btn:hover{background:var(--blue2)}
-.btn.secondary{background:#26344c}
-.btn.danger{background:#432034;color:#ffb4c5}
-.btn:disabled{opacity:.6;cursor:wait}
-.actions,.post-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
-.actions{margin-top:12px}
-.status{display:none;margin-top:12px;padding:10px 12px;border-radius:9px;background:#172942;color:#cfe1ff;font-size:14px;overflow-wrap:anywhere}
-.status.show{display:block}
-.status.error{background:#3b1e2b;color:#ffc4d1}
-.post{border-bottom:1px solid var(--border);padding:18px 0}
-.post:first-child{padding-top:4px}
-.post:last-child{border-bottom:0;padding-bottom:0}
-.post-head{display:flex;align-items:center;gap:11px}
-.avatar{width:43px;height:43px;border-radius:50%;background:linear-gradient(135deg,#3985ff,#7c5cff);display:grid;place-items:center;flex-shrink:0;font-weight:bold;color:white;overflow:hidden}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.profile-avatar{width:78px;height:78px;font-size:25px}
-.post-name{font-weight:bold;overflow-wrap:anywhere}
-.post-date{color:var(--muted);font-size:12px}
-.post-content{white-space:pre-wrap;margin:15px 0;overflow-wrap:anywhere}
-.post-actions{border-top:1px solid var(--border);padding-top:12px}
-.action-btn{background:transparent;color:var(--muted);border:1px solid transparent;padding:8px 11px;border-radius:9px}
-.action-btn:hover{background:var(--panel2);color:white}
-.action-btn.liked{color:#75aaff;background:#162b4c;border-color:#284c7e}
-.count{font-size:12px;margin-left:4px}
-.hidden{display:none!important}
-.comments{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
-.comments-title{font-size:14px;font-weight:bold;margin-bottom:8px}
-.comment{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:8px 0;overflow-wrap:anywhere}
-.comment-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:5px}
-.comment-text{white-space:pre-wrap;font-size:14px}
-.comment-form{display:flex;align-items:flex-start;gap:8px;margin-top:10px}
-.comment-input{flex:1;min-width:0;min-height:44px;max-height:130px;resize:vertical;padding:10px 12px;background:#0b1220;color:white;border:1px solid var(--border);border-radius:10px}
-.comment-input:focus{outline:1px solid var(--blue)}
-.profile-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.profile-info{flex:1;min-width:0}
-.profile-name{font-size:21px;font-weight:bold;overflow-wrap:anywhere}
-.profile-bio{white-space:pre-wrap;overflow-wrap:anywhere}
-.upload-note{margin:8px 0;color:var(--muted);font-size:13px}
-.follow-btn{margin-left:auto;flex-shrink:0;border:1px solid #315b93;border-radius:9px;padding:7px 11px;background:#172b49;color:#cfe1ff;font-weight:bold}
-.follow-btn:hover{background:#22416c}
-.follow-btn.following{background:#172239;color:#b9c7df;border-color:#34435d}
-.follow-btn:disabled{opacity:.6;cursor:wait}
-#notificationCount,#messageCount{display:inline-block;color:#fff;background:#1765e8;border-radius:20px;padding:1px 7px;font-size:12px;font-weight:bold}
-.notification-item{padding:13px;margin:10px 0;border:1px solid var(--border);border-radius:10px;background:#0b1220;overflow-wrap:anywhere}
-.notification-item.unread{border-color:var(--blue);background:#142441}
-.notification-message{font-size:14px;margin-bottom:5px}
-.notification-date{color:var(--muted);font-size:12px}
-.notification-read{margin-top:8px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;color:white;background:var(--panel2)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaybgram — Connect your world</title>
+  <meta name="theme-color" content="#080d18">
+  <style>
+    :root {
+      --bg: #080d18;
+      --panel: #101a2b;
+      --panel2: #14223a;
+      --line: #263754;
+      --blue: #3984ff;
+      --blue2: #65a0ff;
+      --text: #f4f7ff;
+      --muted: #aab8d0;
+      --danger: #ff737e;
+      --success: #55d6a1;
+    }
 
-/* Private Messages */
-.message-select{width:100%;padding:12px;color:white;background:#0b1220;border:1px solid var(--border);border-radius:10px;margin:8px 0}
-.message-list{display:flex;flex-direction:column;gap:10px;max-height:420px;min-height:100px;overflow-y:auto;padding:12px 0}
-.message-bubble{align-self:flex-start;max-width:88%;padding:11px 14px;border-radius:14px;background:#172239;overflow-wrap:anywhere;white-space:pre-wrap}
-.message-bubble.mine{align-self:flex-end;background:#1765e8;color:white}
-.message-meta{font-size:11px;opacity:.8;margin-top:5px}
-.message-compose{display:flex;gap:8px;align-items:flex-end}
-.message-compose textarea{flex:1;min-width:0;min-height:48px;max-height:140px;resize:vertical;padding:12px;color:white;background:#0b1220;border:1px solid var(--border);border-radius:10px}
-.message-compose textarea:focus{outline:1px solid var(--blue)}
-.message-help{font-size:12px;color:var(--muted)}
-footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:13px}
-@media(max-width:780px){
-  .page{grid-template-columns:1fr;margin-top:16px}
-  .sidebar{order:-1}
-  .topbar{padding:12px}
-  nav{gap:2px}
-  nav a{padding:7px;font-size:13px}
-  .card{padding:16px}
-}
-@media(max-width:480px){
-  .message-compose{flex-direction:column;align-items:stretch}
-  .message-compose .btn{width:100%}
-}
-</style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at top left, #102449 0, transparent 42%),
+        var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+    button, input, textarea, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: var(--blue2); }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(8,13,24,.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-inner {
+      max-width: 1120px;
+      margin: auto;
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: white;
+      text-decoration: none;
+    }
+    .brand span { color: var(--blue2); }
+    nav { display: flex; gap: 7px; flex-wrap: wrap; }
+    nav a {
+      color: #d7e3fa;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 9px;
+      font-size: 13px;
+    }
+    nav a:hover { background: #1a2c49; }
+    .wrap { max-width: 850px; margin: 25px auto; padding: 0 15px 45px; }
+    .hero {
+      padding: 28px 24px;
+      margin-bottom: 17px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: linear-gradient(130deg, #142b50, #101a2b 65%);
+    }
+    .eyebrow {
+      color: var(--blue2);
+      font-size: 12px;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    h1 { margin: 8px 0; font-size: clamp(28px, 5vw, 42px); line-height: 1.15; }
+    h2 { margin: 0 0 12px; font-size: 22px; }
+    h3 { margin: 0 0 7px; font-size: 17px; }
+    p { margin-top: 5px; }
+    .muted, .small { color: var(--muted); }
+    .small { font-size: 13px; }
+    .card {
+      background: rgba(16,26,43,.97);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 19px;
+      margin-bottom: 16px;
+      min-width: 0;
+    }
+    .hidden { display: none !important; }
+    .field {
+      display: block;
+      width: 100%;
+      padding: 12px 13px;
+      color: var(--text);
+      background: #091221;
+      border: 1px solid #304464;
+      border-radius: 10px;
+      outline: none;
+      margin: 7px 0 13px;
+    }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #3984ff22; }
+    textarea.field { min-height: 95px; resize: vertical; }
+    select.field { color-scheme: dark; }
+    label { color: #dce7fa; font-size: 13px; font-weight: 700; }
+    .btn {
+      cursor: pointer;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 15px;
+      font-weight: 700;
+      color: white;
+      background: var(--blue);
+      transition: .15s;
+    }
+    .btn:hover { filter: brightness(1.12); }
+    .btn:disabled { opacity: .55; cursor: wait; }
+    .btn.secondary { background: #223653; border: 1px solid #385071; }
+    .btn.danger { background: #582b3a; border: 1px solid #8a4255; }
+    .btn.tiny { padding: 7px 10px; font-size: 12px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .status {
+      padding: 10px 12px;
+      margin: 10px 0;
+      border: 1px solid #385071;
+      border-radius: 9px;
+      color: #dce7fa;
+      overflow-wrap: anywhere;
+    }
+    .status:empty { display: none; }
+    .status.error { color: #ffd2d5; border-color: #8a4255; background: #351925; }
+    .status.success { color: #c7ffe8; border-color: #247c5b; background: #102c25; }
+    .profile-row { display: flex; gap: 13px; align-items: center; min-width: 0; }
+    .avatar {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #233956;
+      border: 1px solid #3b5273;
+    }
+    .avatar.large { width: 75px; height: 75px; flex-basis: 75px; }
+    .profile-name { font-weight: 800; overflow-wrap: anywhere; }
+    .post { margin-bottom: 15px; }
+    .post-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .post-content { white-space: pre-wrap; overflow-wrap: anywhere; margin: 16px 0; }
+    .post-actions { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); padding-top: 12px; }
+    .comment-list { display: grid; gap: 8px; margin: 12px 0; }
+    .comment {
+      background: #0a1424;
+      border: 1px solid #21324b;
+      border-radius: 10px;
+      padding: 10px;
+      overflow-wrap: anywhere;
+    }
+    .comment-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .comment-form { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; }
+    .comment-form textarea { min-height: 43px; margin: 0; }
+    .count { color: var(--blue2); font-size: 12px; }
+    .notification {
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: #0b1525;
+      border-radius: 11px;
+      margin: 9px 0;
+    }
+    .notification.unread { border-color: #3984ff; background: #112342; }
+    .conversation-list {
+      max-height: 390px;
+      min-height: 90px;
+      overflow-y: auto;
+      padding: 12px;
+      margin: 14px 0;
+      border-radius: 12px;
+      background: #091221;
+      border: 1px solid var(--line);
+    }
+    .message-row { display: flex; margin: 9px 0; }
+    .message-row.mine { justify-content: flex-end; }
+    .message-bubble {
+      max-width: 82%;
+      padding: 10px 13px;
+      border-radius: 14px 14px 14px 4px;
+      background: #192943;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    .message-row.mine .message-bubble {
+      background: #1e5bc1;
+      border-radius: 14px 14px 4px 14px;
+    }
+    .message-meta { margin-top: 5px; color: #c1d2ed; font-size: 11px; }
+    .message-compose { display: flex; gap: 9px; align-items: flex-end; }
+    .message-compose textarea { margin-bottom: 0; }
+    footer { text-align: center; color: var(--muted); padding: 25px 10px; font-size: 12px; }
+    @media (max-width: 560px) {
+      .topbar-inner { align-items: flex-start; }
+      nav { width: 100%; }
+      nav a { padding: 7px 8px; }
+      .wrap { margin-top: 14px; padding: 0 10px 30px; }
+      .card { padding: 14px; }
+      .hero { padding: 22px 17px; }
+      .comment-form, .message-compose { flex-direction: column; }
+      .comment-form .btn, .message-compose .btn { width: 100%; }
+      .message-bubble { max-width: 92%; }
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="topbar">
-    <div class="brand">KAYB<span>GRAM</span></div>
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#myProfile">My Profile</a>
-      <a href="#create">Create</a>
-      <a href="#feed">Community</a>
-      <a href="#notifications">🔔 Notifications <span id="notificationCount"></span></a>
-      <a href="#messages">💬 Messages <span id="messageCount"></span></a>
-      <a href="#account">Account</a>
-    </nav>
-  </div>
-</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#home">KAYB<span>GRAM</span></a>
+      <nav aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#myProfile">My Profile</a>
+        <a href="#create">Create</a>
+        <a href="#feed">Community</a>
+        <a href="#notifications">🔔 Notifications <span id="notificationCount"></span></a>
+        <a href="#messages">💬 Messages</a>
+        <a href="#account">Account</a>
+      </nav>
+    </div>
+  </header>
 
-<div class="page" id="home">
-<main class="main">
-  <section class="card hero">
-    <div class="eyebrow">YOUR PEOPLE. YOUR WORLD.</div>
-    <h1>A little closer.<br>A lot more connected.</h1>
-    <p class="muted">Share your moments, meet your community and connect on Kaybgram.</p>
-  </section>
+  <main class="wrap" id="home">
+    <section class="hero">
+      <div class="eyebrow">YOUR PEOPLE. YOUR WORLD.</div>
+      <h1>A little closer.<br>A lot more connected.</h1>
+      <p class="muted">A fresh home for your social life. Share your world, meet people, and stay connected.</p>
+    </section>
 
-  <section class="card" id="account">
-    <div id="signedOut">
-      <h2>Welcome to Kaybgram</h2>
-      <p class="muted small">Sign in or create an account to publish posts, like posts and comment.</p>
+    <section class="card" id="account">
+      <h2>👋 Welcome to Kaybgram</h2>
+      <p class="muted small">Sign in to share posts, follow people, and send private messages.</p>
+      <div id="authStatus" class="status" role="status"></div>
       <form id="authForm">
-        <input class="field" id="email" type="email" placeholder="Email address" autocomplete="email" required>
-        <input class="field" id="password" type="password" placeholder="Password (at least 6 characters)" autocomplete="current-password" minlength="6" required>
+        <label for="authEmail">Email address</label>
+        <input class="field" id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <label for="authPassword">Password</label>
+        <input class="field" id="authPassword" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required>
         <div class="actions">
           <button class="btn" id="signInBtn" type="submit">Sign in</button>
           <button class="btn secondary" id="signUpBtn" type="button">Create account</button>
+          <button class="btn danger hidden" id="signOutBtn" type="button">Sign out</button>
         </div>
       </form>
-    </div>
-    <div id="signedIn" class="hidden">
-      <h2>You're signed in</h2>
-      <p class="muted small" id="userEmail"></p>
-      <button class="btn secondary" id="signOutBtn" type="button">Sign out</button>
-    </div>
-    <div id="authStatus" class="status" role="status"></div>
-  </section>
+      <p id="signedInAs" class="small muted"></p>
+    </section>
 
-  <section class="card hidden" id="notifications">
-    <h2>🔔 Notifications</h2>
-    <p class="muted small">See who follows you, likes your posts, and comments on them.</p>
-    <div id="notificationStatus" class="status" role="status"></div>
-    <div id="notificationList"><p class="muted small">Sign in to see your notifications.</p></div>
-    <button class="btn secondary" id="refreshNotifications" type="button">Refresh notifications</button>
-  </section>
-
-  <section class="card hidden" id="messages">
-    <h2>💬 Private Messages</h2>
-    <p class="muted small">Send a private message to another Kaybgram member.</p>
-
-    <label for="messageMember" class="small">Choose a member</label>
-    <select class="message-select" id="messageMember">
-      <option value="">Sign in to see members</option>
-    </select>
-
-    <div class="actions">
-      <button class="btn secondary" id="refreshMessages" type="button">Refresh conversation</button>
-    </div>
-
-    <div id="messageStatus" class="status" role="status"></div>
-    <div id="messageList" class="message-list" aria-live="polite">
-      <p class="muted small">Choose a member to view messages.</p>
-    </div>
-
-    <form id="messageForm" class="message-compose">
-      <textarea id="messageText" maxlength="2000" placeholder="Write a private message..." aria-label="Write a private message" required></textarea>
-      <button class="btn" id="sendMessageBtn" type="submit">Send</button>
-    </form>
-    <p class="message-help">Messages are visible to the sender and receiver. Refresh the conversation to check for new replies.</p>
-  </section>
-
-  <section class="card hidden" id="myProfile">
-    <h2>My Profile</h2>
-    <div class="profile-top">
-      <div class="avatar profile-avatar" id="profileAvatar">K</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profileDisplayName">Kaybgram member</div>
-        <div class="muted small" id="profileEmail"></div>
-        <p class="profile-bio muted" id="profileBioDisplay">Add a little information about yourself.</p>
+    <section class="card hidden" id="myProfile">
+      <h2>👤 My Profile</h2>
+      <div id="profileStatus" class="status" role="status"></div>
+      <div class="profile-row" style="margin:14px 0">
+        <img id="myAvatar" class="avatar large" alt="Your profile photo">
+        <div>
+          <div id="myDisplayName" class="profile-name">Your profile</div>
+          <div id="myBioPreview" class="small muted">Add a short bio about yourself.</div>
+        </div>
       </div>
-    </div>
-    <div style="height:1px;background:var(--border);margin:18px 0"></div>
-    <h2>Edit Profile</h2>
-    <p class="muted small">Update your name, bio, and profile photo.</p>
-    <form id="profileForm">
-      <label for="displayName" class="small">Display name</label>
-      <input class="field" id="displayName" maxlength="80" placeholder="Your name" required>
-      <label for="bio" class="small">Bio</label>
-      <textarea class="field" id="bio" maxlength="300" placeholder="Tell the community about yourself (up to 300 characters)"></textarea>
-      <label for="profilePhoto" class="small">Upload a profile photo</label>
-      <input class="field" id="profilePhoto" type="file" accept="image/*">
-      <p class="upload-note">Choose an image from your phone or computer. Maximum file size: 5 MB.</p>
-      <div class="actions"><button class="btn" id="uploadPhotoBtn" type="button">Upload Photo</button></div>
-      <label for="avatarUrl" class="small">Or use a public profile picture URL</label>
-      <input class="field" id="avatarUrl" type="url" maxlength="1000" placeholder="https://example.com/your-photo.jpg">
-      <div class="actions"><button class="btn" id="saveProfileBtn" type="submit">Save Profile</button></div>
-    </form>
-    <div id="profileStatus" class="status" role="status"></div>
-  </section>
+      <form id="profileForm">
+        <label for="displayName">Display name</label>
+        <input class="field" id="displayName" maxlength="60" placeholder="Your name" required>
+        <label for="bio">Bio</label>
+        <textarea class="field" id="bio" maxlength="300" placeholder="Tell the community about yourself"></textarea>
+        <label for="profilePhoto">Profile photo (optional, max 5 MB)</label>
+        <input class="field" id="profilePhoto" type="file" accept="image/*">
+        <button class="btn" id="saveProfileBtn" type="submit">Save profile</button>
+      </form>
+    </section>
 
-  <section class="card hidden" id="create">
-    <h2>Create a post</h2>
-    <p class="muted small">Share what's happening in your world.</p>
-    <form id="postForm">
-      <textarea class="field" id="postContent" maxlength="2000" placeholder="What's happening in your world?" required></textarea>
-      <button class="btn" id="publishBtn" type="submit">Publish post</button>
-    </form>
-    <div id="postStatus" class="status" role="status"></div>
-  </section>
+    <section class="card hidden" id="create">
+      <h2>✍️ Create a post</h2>
+      <div id="postStatus" class="status" role="status"></div>
+      <form id="postForm">
+        <label for="caption">What's happening in your world?</label>
+        <textarea class="field" id="caption" maxlength="2000" placeholder="Share something with your community..." required></textarea>
+        <button class="btn" id="publishBtn" type="submit">Publish post</button>
+      </form>
+    </section>
 
-  <section class="card" id="feed">
-    <h2>Community feed</h2>
-    <p class="muted small">Latest posts from Kaybgram.</p>
-    <div id="feedStatus" class="status show" role="status">Loading posts...</div>
-    <div id="posts"></div>
-  </section>
-</main>
-<aside class="sidebar">
-  <section class="card">
-    <h2>Welcome to Kaybgram</h2>
-    <p class="muted small">A fresh home for your social life. Share updates and support your community.</p>
-  </section>
-  <section class="card">
-    <h2>Community guidelines</h2>
-    <p class="muted small">Be kind. Respect other people. Keep your community safe and welcoming.</p>
-  </section>
-</aside>
-</div>
-<footer>Kaybgram · Connect with care.</footer>
+    <section class="card hidden" id="notifications">
+      <h2>🔔 Notifications</h2>
+      <p class="muted small">See when people follow you, like your posts, or comment.</p>
+      <div id="notificationsStatus" class="status" role="status"></div>
+      <div id="notificationsList"><p class="muted small">Sign in to view notifications.</p></div>
+      <button class="btn secondary" id="refreshNotifications" type="button">Refresh notifications</button>
+    </section>
 
-<script>
-"use strict";
+    <section class="card hidden" id="messages">
+      <h2>💬 Private Messages</h2>
+      <p class="muted small">Choose a Kaybgram member to start a private conversation. Only the people in a conversation can read its messages.</p>
+      <div id="messagesStatus" class="status" role="status"></div>
+      <label for="messageMember">Choose a member</label>
+      <select class="field" id="messageMember">
+        <option value="">Loading members...</option>
+      </select>
+      <div class="actions">
+        <button class="btn secondary tiny" id="refreshMembers" type="button">Refresh members</button>
+        <button class="btn secondary tiny" id="refreshConversation" type="button">Refresh conversation</button>
+      </div>
+      <div class="conversation-list" id="conversation" aria-live="polite">
+        <p class="muted small">Choose a member to view your conversation.</p>
+      </div>
+      <form id="messageForm">
+        <label for="messageText">Write a private message</label>
+        <div class="message-compose">
+          <textarea class="field" id="messageText" maxlength="2000" placeholder="Write your message..." required></textarea>
+          <button class="btn" id="sendMessageBtn" type="submit">Send</button>
+        </div>
+      </form>
+    </section>
 
-const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
-const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const PHOTO_BUCKET = "profile-photos";
-const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+    <section id="feed">
+      <div class="card">
+        <div class="post-head">
+          <div>
+            <h2>🌎 Community Feed</h2>
+            <p class="muted small">Updates from your Kaybgram community.</p>
+          </div>
+          <button class="btn secondary tiny" id="refreshFeed" type="button">Refresh feed</button>
+        </div>
+        <div id="feedStatus" class="status" role="status"></div>
+      </div>
+      <div id="postsList">
+        <div class="card"><p class="muted">Loading community posts...</p></div>
+      </div>
+    </section>
+  </main>
 
-let currentUser = null;
-let currentProfile = null;
-let postsLoading = false;
-let reloadRequested = false;
-let notificationsLoading = false;
-let messagesLoading = false;
-let messagesReloadRequested = false;
+  <footer>Kaybgram · Connect with care.</footer>
 
-const $ = id => document.getElementById(id);
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    "use strict";
 
-function showStatus(id, message, isError = false) {
-  const el = $(id);
-  el.textContent = message;
-  el.classList.add("show");
-  el.classList.toggle("error", isError);
-}
-function hideStatus(id) {
-  $(id).classList.remove("show", "error");
-}
-function usernameFor(user) {
-  return currentProfile?.display_name?.trim() ||
-    user?.user_metadata?.username ||
-    user?.user_metadata?.full_name ||
-    user?.email?.split("@")[0] ||
-    "Kaybgram member";
-}
-function updateAuthUI() {
-  $("signedOut").classList.toggle("hidden", !!currentUser);
-  $("signedIn").classList.toggle("hidden", !currentUser);
-  $("create").classList.toggle("hidden", !currentUser);
-  $("myProfile").classList.toggle("hidden", !currentUser);
-  $("userEmail").textContent = currentUser ? "Signed in as " + currentUser.email : "";
-  $("profileEmail").textContent = currentUser?.email || "";
+    const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  if (!currentUser) {
-    $("messages").classList.add("hidden");
-    $("notifications").classList.add("hidden");
-    $("messageCount").textContent = "";
-    $("notificationCount").textContent = "";
-  }
-}
-function formatDate(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "" : date.toLocaleString();
-}
-function makeElement(tag, className, text) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text !== undefined) el.textContent = text;
-  return el;
-}
-function validImageUrl(value) {
-  if (!value) return "";
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.href : "";
-  } catch {
-    return "";
-  }
-}
-function setAvatar(element, name, url) {
-  element.replaceChildren();
-  const safeUrl = validImageUrl(url);
-  if (safeUrl) {
-    const img = document.createElement("img");
-    img.src = safeUrl;
-    img.alt = (name || "Member") + "'s profile picture";
-    img.referrerPolicy = "no-referrer";
-    img.onerror = () => {
-      element.replaceChildren();
-      element.textContent = (name || "K").trim().charAt(0).toUpperCase() || "K";
-    };
-    element.appendChild(img);
-  } else {
-    element.textContent = (name || "K").trim().charAt(0).toUpperCase() || "K";
-  }
-}
+    const $ = (id) => document.getElementById(id);
+    let currentUser = null;
+    let currentProfile = null;
+    let selectedMemberName = "";
+    let notificationUnreadCount = 0;
 
-/* Notifications */
-async function createNotification(recipientId, type, postId, actionText) {
-  if (!currentUser || !recipientId || recipientId === currentUser.id) return;
-
-  const { error } = await client.from("notifications").insert({
-    recipient_id: recipientId,
-    actor_id: currentUser.id,
-    type,
-    post_id: postId || null,
-    message: usernameFor(currentUser) + " " + actionText
-  });
-
-  if (error) console.error("Notification could not be saved:", error.message);
-}
-
-async function loadNotifications() {
-  if (notificationsLoading) return;
-  notificationsLoading = true;
-
-  const list = $("notificationList");
-  const count = $("notificationCount");
-
-  try {
-    if (!currentUser) {
-      list.replaceChildren(makeElement("p", "muted small", "Sign in to see your notifications."));
-      count.textContent = "";
-      return;
+    function makeElement(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text !== undefined && text !== null) el.textContent = String(text);
+      return el;
     }
 
-    const { data, error } = await client
-      .from("notifications")
-      .select("id,actor_id,type,post_id,message,created_at,read_at")
-      .eq("recipient_id", currentUser.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
-
-    const rows = data || [];
-    const unread = rows.filter(item => !item.read_at).length;
-    count.textContent = unread ? String(unread) : "";
-    list.replaceChildren();
-
-    if (!rows.length) {
-      list.appendChild(makeElement("p", "muted small",
-        "No notifications yet. When someone follows, likes, or comments, you'll see it here."));
-      hideStatus("notificationStatus");
-      return;
+    function showStatus(id, message, type = "") {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = message || "";
+      el.className = "status" + (type ? " " + type : "");
     }
 
-    for (const item of rows) {
-      const card = makeElement("div",
-        "notification-item" + (item.read_at ? "" : " unread"));
-      card.appendChild(makeElement("div", "notification-message", item.message));
-      card.appendChild(makeElement("div", "notification-date", formatDate(item.created_at)));
+    function hideStatus(id) {
+      showStatus(id, "");
+    }
 
-      if (!item.read_at) {
-        const readButton = makeElement("button", "notification-read", "Mark as read");
-        readButton.type = "button";
-        readButton.addEventListener("click", async () => {
-          if (!currentUser) return;
-          readButton.disabled = true;
-          try {
-            const { error: updateError } = await client.from("notifications")
-              .update({ read_at: new Date().toISOString() })
-              .eq("id", item.id).eq("recipient_id", currentUser.id);
-            if (updateError) throw updateError;
-            await loadNotifications();
-          } catch (error) {
-            showStatus("notificationStatus", "Could not mark as read: " + error.message, true);
-            readButton.disabled = false;
-          }
+    function formatDate(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    function usernameFor(profile, fallback = "Kaybgram member") {
+      return profile && profile.display_name
+        ? profile.display_name
+        : fallback;
+    }
+
+    function avatarUrl(profile) {
+      return profile && profile.avatar_url
+        ? profile.avatar_url
+        : "https://placehold.co/100x100/14223a/ffffff?text=K";
+    }
+
+    function setAvatar(img, profile) {
+      img.src = avatarUrl(profile);
+      img.alt = usernameFor(profile) + " profile photo";
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = "https://placehold.co/100x100/14223a/ffffff?text=K";
+      };
+    }
+
+    function updateAuthUI() {
+      const signedIn = !!currentUser;
+      $("signInBtn").classList.toggle("hidden", signedIn);
+      $("signUpBtn").classList.toggle("hidden", signedIn);
+      $("signOutBtn").classList.toggle("hidden", !signedIn);
+      $("myProfile").classList.toggle("hidden", !signedIn);
+      $("create").classList.toggle("hidden", !signedIn);
+      $("signedInAs").textContent = signedIn
+        ? "Signed in as " + (currentUser.email || "Kaybgram member")
+        : "You are currently signed out.";
+      if (!signedIn) {
+        $("notifications").classList.add("hidden");
+        $("messages").classList.add("hidden");
+      }
+    }
+
+    async function createNotification(recipientId, type, message, postId = null) {
+      if (!currentUser || !recipientId || recipientId === currentUser.id) return;
+      try {
+        const { error } = await client.from("notifications").insert({
+          recipient_id: recipientId,
+          actor_id: currentUser.id,
+          type,
+          post_id: postId,
+          message
         });
-        card.appendChild(readButton);
+        if (error) console.warn("Notification was not saved:", error.message);
+      } catch (error) {
+        console.warn("Notification error:", error);
       }
-      list.appendChild(card);
-    }
-    hideStatus("notificationStatus");
-  } catch (error) {
-    showStatus("notificationStatus", "Could not load notifications: " + error.message, true);
-  } finally {
-    notificationsLoading = false;
-  }
-}
-$("refreshNotifications").addEventListener("click", loadNotifications);
-
-/* Private Messages */
-function selectedMessageMember() {
-  const userId = $("messageMember").value;
-  if (!userId) return null;
-  return {
-    user_id: userId,
-    display_name: $("messageMember").selectedOptions[0]?.dataset.name ||
-      $("messageMember").selectedOptions[0]?.textContent ||
-      "Kaybgram member"
-  };
-}
-
-async function loadMessageMembers() {
-  if (!currentUser) {
-    $("messageMember").replaceChildren(new Option("Sign in to see members", ""));
-    $("messageList").replaceChildren(
-      makeElement("p", "muted small", "Please sign in to use private messages.")
-    );
-    return;
-  }
-
-  const previousId = $("messageMember").value;
-  showStatus("messageStatus", "Loading Kaybgram members...");
-
-  try {
-    const { data, error } = await client
-      .from("profiles")
-      .select("user_id,display_name")
-      .neq("user_id", currentUser.id)
-      .order("display_name", { ascending: true })
-      .limit(100);
-
-    if (error) throw error;
-
-    const members = data || [];
-    const select = $("messageMember");
-    select.replaceChildren(new Option("Choose a member...", ""));
-
-    for (const member of members) {
-      const option = new Option(member.display_name || "Kaybgram member", member.user_id);
-      option.dataset.name = member.display_name || "Kaybgram member";
-      select.add(option);
     }
 
-    if (members.some(member => member.user_id === previousId)) {
-      select.value = previousId;
-    }
+    async function loadNotifications() {
+      if (!currentUser) {
+        showStatus("notificationsStatus", "Sign in to see your notifications.");
+        return;
+      }
+      const list = $("notificationsList");
+      list.replaceChildren(makeElement("p", "muted small", "Loading notifications..."));
+      hideStatus("notificationsStatus");
 
-    if (!members.length) {
-      showStatus("messageStatus",
-        "No other profiles were found. Ask another Kaybgram member to sign in and save their profile.");
-      $("messageList").replaceChildren();
-      $("messageList").appendChild(
-        makeElement("p", "muted small", "No members available yet.")
-      );
-      return;
-    }
+      const { data, error } = await client
+        .from("notifications")
+        .select("id,recipient_id,actor_id,type,post_id,message,is_read,created_at")
+        .eq("recipient_id", currentUser.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-    hideStatus("messageStatus");
-
-    if (select.value) {
-      await loadConversation();
-    } else {
-      $("messageList").replaceChildren(
-        makeElement("p", "muted small", "Choose a member to view messages.")
-      );
-    }
-  } catch (error) {
-    showStatus("messageStatus", "Could not load members: " + error.message, true);
-  }
-}
-
-async function loadConversation() {
-  if (messagesLoading) {
-    messagesReloadRequested = true;
-    return;
-  }
-
-  if (!currentUser) {
-    showStatus("messageStatus", "Please sign in to use private messages.", true);
-    return;
-  }
-
-  const member = selectedMessageMember();
-  if (!member) {
-    $("messageList").replaceChildren(
-      makeElement("p", "muted small", "Choose a member to view messages.")
-    );
-    return;
-  }
-
-  messagesLoading = true;
-  $("messageList").replaceChildren(
-    makeElement("p", "muted small", "Loading conversation...")
-  );
-
-  try {
-    // Fetch both directions separately to keep the conversation query reliable.
-    const sentRequest = client.from("messages")
-      .select("id,sender_id,receiver_id,message_text,created_at,read_at")
-      .eq("sender_id", currentUser.id)
-      .eq("receiver_id", member.user_id)
-      .order("created_at", { ascending: true })
-      .limit(200);
-
-    const receivedRequest = client.from("messages")
-      .select("id,sender_id,receiver_id,message_text,created_at,read_at")
-      .eq("sender_id", member.user_id)
-      .eq("receiver_id", currentUser.id)
-      .order("created_at", { ascending: true })
-      .limit(200);
-
-    const [sentResult, receivedResult] = await Promise.all([
-      sentRequest, receivedRequest
-    ]);
-
-    if (sentResult.error) throw sentResult.error;
-    if (receivedResult.error) throw receivedResult.error;
-
-    const messages = [
-      ...(sentResult.data || []),
-      ...(receivedResult.data || [])
-    ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-    const list = $("messageList");
-    list.replaceChildren();
-
-    if (!messages.length) {
-      list.appendChild(
-        makeElement("p", "muted small", "No messages yet. Say hello!")
-      );
-    } else {
-      for (const message of messages) {
-        const mine = message.sender_id === currentUser.id;
-        const bubble = makeElement("div", "message-bubble" + (mine ? " mine" : ""));
-        bubble.appendChild(makeElement("div", "", message.message_text));
-
-        let metaText = (mine ? "You" : member.display_name) +
-          " · " + formatDate(message.created_at);
-        if (mine && message.read_at) metaText += " · Read";
-
-        bubble.appendChild(makeElement("div", "message-meta", metaText));
-        list.appendChild(bubble);
+      if (error) {
+        list.replaceChildren();
+        showStatus("notificationsStatus", "Could not load notifications: " + error.message, "error");
+        return;
       }
 
-      // Mark messages from this member as read.
-      const unreadIds = messages
-        .filter(message =>
-          message.sender_id === member.user_id &&
-          message.receiver_id === currentUser.id &&
-          !message.read_at
-        )
-        .map(message => message.id);
+      const notifications = data || [];
+      notificationUnreadCount = notifications.filter(n => !n.is_read).length;
+      $("notificationCount").textContent = notificationUnreadCount ? "(" + notificationUnreadCount + ")" : "";
 
+      if (!notifications.length) {
+        list.replaceChildren(makeElement("p", "muted small", "No notifications yet. When people interact with you, you'll see it here."));
+        return;
+      }
+
+      const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
+      let profileMap = {};
+      if (actorIds.length) {
+        const { data: profiles } = await client
+          .from("profiles")
+          .select("user_id,display_name,avatar_url")
+          .in("user_id", actorIds);
+        (profiles || []).forEach(p => profileMap[p.user_id] = p);
+      }
+
+      list.replaceChildren();
+      notifications.forEach(n => {
+        const item = makeElement("div", "notification" + (n.is_read ? "" : " unread"));
+        const actor = profileMap[n.actor_id];
+        const name = usernameFor(actor);
+        const message = n.message || (name + " interacted with you on Kaybgram.");
+        item.append(
+          makeElement("div", "profile-name", message),
+          makeElement("div", "small muted", formatDate(n.created_at))
+        );
+        list.append(item);
+      });
+
+      const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
       if (unreadIds.length) {
-        const { error: readError } = await client.from("messages")
-          .update({ read_at: new Date().toISOString() })
+        const { error: updateError } = await client
+          .from("notifications")
+          .update({ is_read: true })
           .in("id", unreadIds)
-          .eq("receiver_id", currentUser.id);
-
-        if (readError) {
-          console.warn("Could not mark messages as read:", readError.message);
+          .eq("recipient_id", currentUser.id);
+        if (!updateError) {
+          notificationUnreadCount = 0;
+          $("notificationCount").textContent = "";
         }
       }
     }
 
-    list.scrollTop = list.scrollHeight;
-    hideStatus("messageStatus");
-    await loadMessageCount();
-  } catch (error) {
-    showStatus("messageStatus", "Could not load conversation: " + error.message, true);
-  } finally {
-    messagesLoading = false;
-    if (messagesReloadRequested) {
-      messagesReloadRequested = false;
-      loadConversation();
-    }
-  }
-}
-
-async function loadMessageCount() {
-  if (!currentUser) {
-    $("messageCount").textContent = "";
-    return;
-  }
-
-  try {
-    const { data, error } = await client.from("messages")
-      .select("id")
-      .eq("receiver_id", currentUser.id)
-      .is("read_at", null)
-      .limit(100);
-
-    if (error) throw error;
-    $("messageCount").textContent = data && data.length ? String(data.length) : "";
-  } catch (error) {
-    console.warn("Could not load unread message count:", error.message);
-  }
-}
-
-$("messageMember").addEventListener("change", loadConversation);
-
-$("refreshMessages").addEventListener("click", async () => {
-  await loadMessageMembers();
-  if (selectedMessageMember()) await loadConversation();
-});
-
-$("messageForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  hideStatus("messageStatus");
-
-  if (!currentUser) {
-    showStatus("messageStatus", "Please sign in before sending messages.", true);
-    return;
-  }
-
-  const member = selectedMessageMember();
-  if (!member) {
-    showStatus("messageStatus", "Please choose a member first.", true);
-    return;
-  }
-
-  const messageText = $("messageText").value.trim();
-  if (!messageText) {
-    showStatus("messageStatus", "Please type a message first.", true);
-    return;
-  }
-
-  const button = $("sendMessageBtn");
-  button.disabled = true;
-
-  try {
-    const { error } = await client.from("messages").insert({
-      sender_id: currentUser.id,
-      receiver_id: member.user_id,
-      message_text: messageText
-    });
-
-    if (error) throw error;
-
-    $("messageText").value = "";
-    await loadConversation();
-    showStatus("messageStatus", "Message sent successfully!");
-  } catch (error) {
-    showStatus("messageStatus", "Could not send message: " + error.message, true);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-/* Profile */
-async function loadMyProfile() {
-  if (!currentUser) {
-    currentProfile = null;
-    return;
-  }
-
-  const { data, error } = await client.from("profiles")
-    .select("user_id,display_name,bio,avatar_url")
-    .eq("user_id", currentUser.id)
-    .maybeSingle();
-
-  if (error) throw error;
-
-  currentProfile = data || {
-    user_id: currentUser.id,
-    display_name: currentUser.user_metadata?.full_name ||
-      currentUser.user_metadata?.username ||
-      currentUser.email?.split("@")[0] || "Kaybgram member",
-    bio: "",
-    avatar_url: ""
-  };
-
-  $("displayName").value = currentProfile.display_name || "";
-  $("bio").value = currentProfile.bio || "";
-  $("avatarUrl").value = currentProfile.avatar_url || "";
-  renderMyProfile();
-}
-
-function renderMyProfile() {
-  const name = usernameFor(currentUser);
-  $("profileDisplayName").textContent = name;
-  $("profileBioDisplay").textContent = currentProfile?.bio || "Add a little information about yourself.";
-  setAvatar($("profileAvatar"), name, currentProfile?.avatar_url);
-}
-
-/* Feed */
-async function loadPosts() {
-  if (postsLoading) {
-    reloadRequested = true;
-    return;
-  }
-
-  postsLoading = true;
-  const container = $("posts");
-  container.replaceChildren();
-  showStatus("feedStatus", "Loading posts...");
-
-  try {
-    const { data: posts, error } = await client.from("posts")
-      .select("id,user_id,username,content,created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    if (!posts || posts.length === 0) {
-      showStatus("feedStatus", "No posts yet. Be the first to share something!");
-      return;
-    }
-
-    let likes = [];
-    let comments = [];
-    let profiles = [];
-    let followedUserIds = new Set();
-    const authorIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
-
-    if (authorIds.length) {
-      const { data, error: profilesError } = await client.from("profiles")
+    async function loadMyProfile() {
+      if (!currentUser) return;
+      const { data, error } = await client
+        .from("profiles")
         .select("user_id,display_name,bio,avatar_url")
-        .in("user_id", authorIds);
-      if (profilesError) throw profilesError;
-      profiles = data || [];
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+
+      if (error) {
+        showStatus("profileStatus", "Could not load profile: " + error.message, "error");
+        return;
+      }
+
+      currentProfile = data || {
+        user_id: currentUser.id,
+        display_name: currentUser.email ? currentUser.email.split("@")[0] : "Kaybgram member",
+        bio: "",
+        avatar_url: ""
+      };
+
+      $("displayName").value = currentProfile.display_name || "";
+      $("bio").value = currentProfile.bio || "";
+      $("myDisplayName").textContent = currentProfile.display_name || "Your name";
+      $("myBioPreview").textContent = currentProfile.bio || "Add a short bio about yourself.";
+      setAvatar($("myAvatar"), currentProfile);
     }
 
-    if (currentUser) {
-      const { data, error: likesError } = await client.from("likes")
-        .select("post_id,user_id");
-      if (likesError) throw likesError;
-      likes = data || [];
-
-      const postIds = posts.map(post => post.id);
-      const { data: commentRows, error: commentsError } = await client.from("comments")
-        .select("id,post_id,user_id,content,created_at")
-        .in("post_id", postIds)
-        .order("created_at", { ascending: true });
-      if (commentsError) throw commentsError;
-      comments = commentRows || [];
-
-      const { data: followRows, error: followsError } = await client.from("follows")
-        .select("following_id")
-        .eq("follower_id", currentUser.id);
-      if (followsError) throw followsError;
-      followedUserIds = new Set((followRows || []).map(row => row.following_id));
+    async function saveProfileData(displayName, bio, avatarUrlValue) {
+      const profileData = {
+        user_id: currentUser.id,
+        display_name: displayName,
+        bio,
+        avatar_url: avatarUrlValue || ""
+      };
+      const { error } = await client
+        .from("profiles")
+        .upsert(profileData, { onConflict: "user_id" });
+      if (error) throw error;
+      currentProfile = profileData;
     }
 
-    const profilesByUser = new Map(profiles.map(profile => [profile.user_id, profile]));
-    const likeCounts = new Map();
-    const likedByMe = new Set();
+    async function uploadProfilePhoto(file) {
+      if (!file) return currentProfile ? currentProfile.avatar_url : "";
+      if (!file.type.startsWith("image/")) throw new Error("Please choose an image file.");
+      if (file.size > 5 * 1024 * 1024) throw new Error("Your profile photo must be 5 MB or smaller.");
 
-    for (const like of likes) {
-      const id = String(like.post_id);
-      likeCounts.set(id, (likeCounts.get(id) || 0) + 1);
-      if (currentUser && like.user_id === currentUser.id) likedByMe.add(id);
+      const extension = (file.name.split(".").pop() || "jpg").replace(/[^a-zA-Z0-9]/g, "");
+      const path = currentUser.id + "/" + Date.now() + "." + extension;
+      const { error } = await client.storage
+        .from("profile-photos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+
+      if (error) throw new Error("Photo upload failed. Check that the profile-photos storage bucket exists and is public. " + error.message);
+
+      const { data } = client.storage.from("profile-photos").getPublicUrl(path);
+      return data.publicUrl;
     }
 
-    const commentsByPost = new Map();
-    for (const comment of comments) {
-      const id = String(comment.post_id);
-      if (!commentsByPost.has(id)) commentsByPost.set(id, []);
-      commentsByPost.get(id).push(comment);
-    }
+    $("profileForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!currentUser) return showStatus("profileStatus", "Please sign in first.", "error");
 
-    for (const post of posts) {
-      container.appendChild(createPostCard(
-        post,
-        likeCounts.get(String(post.id)) || 0,
-        likedByMe.has(String(post.id)),
-        commentsByPost.get(String(post.id)) || [],
-        profilesByUser.get(post.user_id),
-        followedUserIds.has(post.user_id)
-      ));
-    }
-
-    hideStatus("feedStatus");
-  } catch (error) {
-    showStatus("feedStatus", "Could not load the feed: " + (error.message || "Please try again."), true);
-  } finally {
-    postsLoading = false;
-    if (reloadRequested) {
-      reloadRequested = false;
-      loadPosts();
-    }
-  }
-}
-
-function createPostCard(post, likeCount, liked, comments, profile, isFollowing = false) {
-  const card = makeElement("article", "post");
-  const displayName = profile?.display_name?.trim() || post.username || "Kaybgram member";
-  const avatarUrl = profile?.avatar_url || "";
-
-  const head = makeElement("div", "post-head");
-  const avatar = makeElement("div", "avatar");
-  setAvatar(avatar, displayName, avatarUrl);
-
-  const details = makeElement("div");
-  details.appendChild(makeElement("div", "post-name", displayName));
-  details.appendChild(makeElement("div", "post-date", formatDate(post.created_at)));
-  head.append(avatar, details);
-
-  if (currentUser && post.user_id && post.user_id !== currentUser.id) {
-    const followButton = makeElement("button",
-      "follow-btn" + (isFollowing ? " following" : ""),
-      isFollowing ? "Following" : "+ Follow");
-    followButton.type = "button";
-    followButton.setAttribute("aria-pressed", String(isFollowing));
-
-    followButton.addEventListener("click", async () => {
-      if (!currentUser || followButton.disabled) return;
-      followButton.disabled = true;
+      const button = $("saveProfileBtn");
+      button.disabled = true;
+      hideStatus("profileStatus");
 
       try {
-        if (followButton.classList.contains("following")) {
-          const { error } = await client.from("follows").delete()
-            .eq("follower_id", currentUser.id)
-            .eq("following_id", post.user_id);
-          if (error) throw error;
-        } else {
-          const { error } = await client.from("follows").insert({
-            follower_id: currentUser.id,
-            following_id: post.user_id
-          });
-          if (error) throw error;
-          await createNotification(post.user_id, "follow", null, "started following you.");
-        }
+        const displayName = $("displayName").value.trim();
+        const bio = $("bio").value.trim();
+        if (!displayName) throw new Error("Please enter a display name.");
+
+        const photo = $("profilePhoto").files[0];
+        const newAvatarUrl = photo ? await uploadProfilePhoto(photo) : (currentProfile?.avatar_url || "");
+        await saveProfileData(displayName, bio, newAvatarUrl);
+        $("profilePhoto").value = "";
+        await loadMyProfile();
+        showStatus("profileStatus", "Your profile has been saved.", "success");
         await loadPosts();
       } catch (error) {
-        showStatus("feedStatus", "Could not update follow status: " + error.message, true);
-        followButton.disabled = false;
+        showStatus("profileStatus", error.message || "Could not save your profile.", "error");
+      } finally {
+        button.disabled = false;
       }
     });
-    head.appendChild(followButton);
-  }
 
-  card.appendChild(head);
-  card.appendChild(makeElement("div", "post-content", post.content || ""));
+    async function loadPosts() {
+      const list = $("postsList");
+      list.replaceChildren(makeElement("div", "card", "Loading community posts..."));
+      hideStatus("feedStatus");
 
-  const actions = makeElement("div", "post-actions");
-  const likeButton = makeElement("button", "action-btn" + (liked ? " liked" : ""));
-  likeButton.type = "button";
-  likeButton.setAttribute("aria-pressed", String(liked));
-  likeButton.textContent = liked ? "♥ Unlike" : "♡ Like";
-  const count = makeElement("span", "count", String(likeCount));
-  count.setAttribute("aria-label", likeCount + " likes");
-  likeButton.appendChild(count);
+      const { data: posts, error } = await client
+        .from("posts")
+        .select("id,user_id,content,created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-  likeButton.addEventListener("click", async () => {
-    if (!currentUser) {
-      showStatus("authStatus", "Please sign in before liking a post.", true);
-      $("account").scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-    if (likeButton.disabled) return;
-    likeButton.disabled = true;
-
-    try {
-      let result;
-      if (likeButton.classList.contains("liked")) {
-        result = await client.from("likes").delete()
-          .eq("post_id", post.id).eq("user_id", currentUser.id);
-      } else {
-        result = await client.from("likes").insert({
-          post_id: post.id, user_id: currentUser.id
-        });
+      if (error) {
+        list.replaceChildren();
+        showStatus("feedStatus", "Could not load posts: " + error.message, "error");
+        return;
       }
-      if (result.error) throw result.error;
-      if (!liked) await createNotification(post.user_id, "like", post.id, "liked your post.");
-      await loadPosts();
-    } catch (error) {
-      showStatus("feedStatus", "Could not update your like: " + error.message, true);
-      likeButton.disabled = false;
-    }
-  });
-  actions.appendChild(likeButton);
 
-  const commentButton = makeElement("button", "action-btn", "Comment (" + comments.length + ")");
-  commentButton.type = "button";
-  actions.appendChild(commentButton);
-
-  const shareButton = makeElement("button", "action-btn", "Share");
-  shareButton.type = "button";
-  shareButton.addEventListener("click", async () => {
-    const shareText = displayName + ": " + (post.content || "");
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Kaybgram post", text: shareText, url: location.href });
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareText + "\n" + location.href);
-        showStatus("feedStatus", "Post text copied. You can now share it.");
-      } else {
-        showStatus("feedStatus", shareText);
+      if (!posts || !posts.length) {
+        list.replaceChildren(makeElement("div", "card muted", "No posts yet. Sign in and publish the first post!"));
+        return;
       }
-    } catch (error) {
-      if (error.name !== "AbortError") showStatus("feedStatus", "Unable to share this post.", true);
+
+      const postIds = posts.map(p => p.id);
+      const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
+      let profiles = [], likes = [], comments = [], follows = [];
+
+      const profilePromise = userIds.length
+        ? client.from("profiles").select("user_id,display_name,bio,avatar_url").in("user_id", userIds)
+        : Promise.resolve({ data: [] });
+      const likesPromise = client.from("likes").select("post_id,user_id").in("post_id", postIds);
+      const commentsPromise = client.from("comments").select("id,post_id,user_id,content,created_at").in("post_id", postIds).order("created_at", { ascending: true });
+      const followsPromise = currentUser
+        ? client.from("follows").select("follower_id,following_id").eq("follower_id", currentUser.id)
+        : Promise.resolve({ data: [] });
+
+      const [profileResult, likeResult, commentResult, followResult] = await Promise.all([
+        profilePromise, likesPromise, commentsPromise, followsPromise
+      ]);
+
+      profiles = profileResult.data || [];
+      likes = likeResult.data || [];
+      comments = commentResult.data || [];
+      follows = followResult.data || [];
+
+      if (likeResult.error) console.warn("Likes could not load:", likeResult.error.message);
+      if (commentResult.error) console.warn("Comments could not load:", commentResult.error.message);
+      if (followResult.error) console.warn("Follows could not load:", followResult.error.message);
+
+      const profileMap = {};
+      profiles.forEach(p => profileMap[p.user_id] = p);
+      list.replaceChildren();
+
+      posts.forEach(post => {
+        list.append(createPostCard(
+          post,
+          profileMap[post.user_id],
+          likes.filter(l => l.post_id === post.id),
+          comments.filter(c => c.post_id === post.id),
+          follows.some(f => f.following_id === post.user_id)
+        ));
+      });
     }
-  });
-  actions.appendChild(shareButton);
-  card.appendChild(actions);
 
-  const commentSection = makeElement("section", "comments");
-  commentSection.appendChild(makeElement("div", "comments-title", "Comments (" + comments.length + ")"));
-  const commentList = makeElement("div", "comment-list");
+    function createPostCard(post, profile, postLikes, postComments, isFollowing) {
+      const card = makeElement("article", "card post");
+      const head = makeElement("div", "post-head");
+      const identity = makeElement("div", "profile-row");
+      const avatar = makeElement("img", "avatar");
+      setAvatar(avatar, profile);
+      const nameBox = makeElement("div");
+      nameBox.append(
+        makeElement("div", "profile-name", usernameFor(profile)),
+        makeElement("div", "small muted", formatDate(post.created_at))
+      );
+      identity.append(avatar, nameBox);
+      head.append(identity);
 
-  if (!currentUser) {
-    commentList.appendChild(makeElement("p", "muted small", "Sign in to view and add comments."));
-  } else if (!comments.length) {
-    commentList.appendChild(makeElement("p", "muted small", "No comments yet. Be the first to comment!"));
-  } else {
-    for (const comment of comments) {
-      const item = makeElement("div", "comment");
-      const commentHead = makeElement("div", "comment-head");
-      commentHead.appendChild(makeElement("span", "", comment.user_id === currentUser.id ? "You" : "Kaybgram member"));
-      commentHead.appendChild(makeElement("span", "", formatDate(comment.created_at)));
-      item.appendChild(commentHead);
-      item.appendChild(makeElement("div", "comment-text", comment.content));
-
-      if (comment.user_id === currentUser.id) {
-        const deleteButton = makeElement("button", "action-btn", "Delete");
-        deleteButton.type = "button";
-        deleteButton.addEventListener("click", async () => {
-          if (!confirm("Delete your comment?")) return;
-          deleteButton.disabled = true;
+      const controls = makeElement("div", "actions");
+      if (currentUser && currentUser.id !== post.user_id) {
+        const followBtn = makeElement("button", "btn secondary tiny", isFollowing ? "Unfollow" : "Follow");
+        followBtn.type = "button";
+        followBtn.addEventListener("click", async () => {
+          followBtn.disabled = true;
           try {
-            const { error } = await client.from("comments").delete()
-              .eq("id", comment.id).eq("user_id", currentUser.id);
-            if (error) throw error;
+            if (isFollowing) {
+              const { error } = await client.from("follows")
+                .delete()
+                .eq("follower_id", currentUser.id)
+                .eq("following_id", post.user_id);
+              if (error) throw error;
+            } else {
+              const { error } = await client.from("follows").insert({
+                follower_id: currentUser.id,
+                following_id: post.user_id
+              });
+              if (error) throw error;
+              await createNotification(post.user_id, "follow", usernameFor(currentProfile, currentUser.email) + " started following you.");
+            }
             await loadPosts();
           } catch (error) {
-            showStatus("feedStatus", "Could not delete comment: " + error.message, true);
-            deleteButton.disabled = false;
+            showStatus("feedStatus", "Could not update follow: " + error.message, "error");
+            followBtn.disabled = false;
           }
         });
-        item.appendChild(deleteButton);
+        controls.append(followBtn);
       }
-      commentList.appendChild(item);
-    }
-  }
 
-  commentSection.appendChild(commentList);
-  const commentForm = makeElement("form", "comment-form");
-  const commentInput = makeElement("textarea", "comment-input");
-  commentInput.rows = 1;
-  commentInput.maxLength = 2000;
-  commentInput.placeholder = currentUser ? "Write a comment..." : "Sign in to comment";
-  commentInput.setAttribute("aria-label", "Write a comment");
-  commentInput.disabled = !currentUser;
+      if (currentUser && currentUser.id === post.user_id) {
+        const deleteBtn = makeElement("button", "btn danger tiny", "Delete post");
+        deleteBtn.type = "button";
+        deleteBtn.addEventListener("click", async () => {
+          if (!confirm("Delete this post?")) return;
+          deleteBtn.disabled = true;
+          const { error } = await client.from("posts").delete().eq("id", post.id).eq("user_id", currentUser.id);
+          if (error) {
+            showStatus("feedStatus", "Could not delete post: " + error.message, "error");
+            deleteBtn.disabled = false;
+          } else {
+            await loadPosts();
+          }
+        });
+        controls.append(deleteBtn);
+      }
+      head.append(controls);
 
-  const sendButton = makeElement("button", "btn", "Send");
-  sendButton.type = "submit";
-  sendButton.disabled = !currentUser;
-  commentForm.append(commentInput, sendButton);
-
-  commentForm.addEventListener("submit", async event => {
-    event.preventDefault();
-    if (!currentUser) {
-      showStatus("authStatus", "Please sign in before commenting.", true);
-      return;
-    }
-
-    const content = commentInput.value.trim();
-    if (!content) {
-      commentInput.focus();
-      return;
-    }
-    sendButton.disabled = true;
-
-    try {
-      const { error } = await client.from("comments").insert({
-        post_id: post.id, user_id: currentUser.id, content
+      const content = makeElement("div", "post-content", post.content || "");
+      const actions = makeElement("div", "post-actions");
+      const userLiked = !!(currentUser && postLikes.some(l => l.user_id === currentUser.id));
+      const likeBtn = makeElement("button", "btn secondary tiny", (userLiked ? "♥ Unlike" : "♡ Like") + " (" + postLikes.length + ")");
+      likeBtn.type = "button";
+      likeBtn.addEventListener("click", async () => {
+        if (!currentUser) return showStatus("feedStatus", "Sign in to like posts.", "error");
+        likeBtn.disabled = true;
+        try {
+          if (userLiked) {
+            const { error } = await client.from("likes").delete()
+              .eq("post_id", post.id).eq("user_id", currentUser.id);
+            if (error) throw error;
+          } else {
+            const { error } = await client.from("likes").insert({
+              post_id: post.id,
+              user_id: currentUser.id
+            });
+            if (error) throw error;
+            await createNotification(post.user_id, "like", usernameFor(currentProfile, currentUser.email) + " liked your post.", post.id);
+          }
+          await loadPosts();
+        } catch (error) {
+          showStatus("feedStatus", "Could not update like: " + error.message, "error");
+          likeBtn.disabled = false;
+        }
       });
-      if (error) throw error;
-      await createNotification(post.user_id, "comment", post.id, "commented on your post.");
-      commentInput.value = "";
-      showStatus("feedStatus", "Your comment was saved!");
-      await loadPosts();
-    } catch (error) {
-      showStatus("feedStatus", "Could not save your comment: " + error.message, true);
-    } finally {
-      sendButton.disabled = false;
-    }
-  });
 
-  commentSection.appendChild(commentForm);
-  card.appendChild(commentSection);
-
-  commentButton.addEventListener("click", () => {
-    commentSection.scrollIntoView({ behavior: "smooth", block: "center" });
-    if (currentUser) {
-      commentInput.focus();
-    } else {
-      showStatus("authStatus", "Please sign in to view and add comments.");
-      $("account").scrollIntoView({ behavior: "smooth" });
-    }
-  });
-
-  return card;
-}
-
-/* Save and upload profile */
-async function saveProfileData(avatarUrl) {
-  const displayName = $("displayName").value.trim();
-  const bio = $("bio").value.trim();
-  if (!displayName) throw new Error("Please enter a display name before saving.");
-
-  const profileData = {
-    user_id: currentUser.id,
-    display_name: displayName,
-    bio,
-    avatar_url: avatarUrl,
-    updated_at: new Date().toISOString()
-  };
-
-  const { error } = await client.from("profiles")
-    .upsert(profileData, { onConflict: "user_id" });
-  if (error) throw error;
-
-  currentProfile = profileData;
-  $("avatarUrl").value = avatarUrl || "";
-  renderMyProfile();
-  await loadPosts();
-}
-
-$("uploadPhotoBtn").addEventListener("click", async () => {
-  hideStatus("profileStatus");
-  if (!currentUser) {
-    showStatus("profileStatus", "Please sign in first.", true);
-    return;
-  }
-
-  const file = $("profilePhoto").files[0];
-  if (!file) {
-    showStatus("profileStatus", "Please choose a photo first.", true);
-    return;
-  }
-  if (!file.type.startsWith("image/")) {
-    showStatus("profileStatus", "Please choose an image file.", true);
-    return;
-  }
-  if (file.size > MAX_PHOTO_SIZE) {
-    showStatus("profileStatus", "This photo is larger than 5 MB. Please choose a smaller image.", true);
-    return;
-  }
-
-  const extensionFromName = file.name.includes(".")
-    ? file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "")
-    : "";
-  const extensionFromType = file.type.split("/")[1]?.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const extension = extensionFromName || extensionFromType || "jpg";
-  const filePath = currentUser.id + "/" + Date.now() + "-" +
-    Math.random().toString(36).slice(2) + "." + extension;
-
-  $("uploadPhotoBtn").disabled = true;
-  $("uploadPhotoBtn").textContent = "Uploading...";
-
-  try {
-    const { error: uploadError } = await client.storage.from(PHOTO_BUCKET)
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type
+      const commentToggle = makeElement("button", "btn secondary tiny", "Comments (" + postComments.length + ")");
+      commentToggle.type = "button";
+      const shareBtn = makeElement("button", "btn secondary tiny", "Share");
+      shareBtn.type = "button";
+      shareBtn.addEventListener("click", async () => {
+        const shareText = usernameFor(profile) + " on Kaybgram: " + (post.content || "");
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: "Kaybgram post", text: shareText, url: location.href });
+          } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(shareText + "\n" + location.href);
+            showStatus("feedStatus", "Post text copied. You can share it now.", "success");
+          } else {
+            prompt("Copy this post to share:", shareText);
+          }
+        } catch (error) {
+          if (error.name !== "AbortError") showStatus("feedStatus", "Could not share this post.", "error");
+        }
       });
-    if (uploadError) throw uploadError;
+      actions.append(likeBtn, commentToggle, shareBtn);
 
-    const { data: publicData } = client.storage.from(PHOTO_BUCKET).getPublicUrl(filePath);
-    const photoUrl = publicData?.publicUrl;
-    if (!photoUrl) throw new Error("The photo uploaded, but its public URL could not be created.");
+      const commentsArea = makeElement("div", "hidden");
+      commentToggle.addEventListener("click", () => commentsArea.classList.toggle("hidden"));
 
-    await saveProfileData(photoUrl);
-    $("profilePhoto").value = "";
-    showStatus("profileStatus", "Your photo uploaded successfully and your profile was saved!");
-  } catch (error) {
-    showStatus("profileStatus", "Photo upload failed: " + error.message, true);
-  } finally {
-    $("uploadPhotoBtn").disabled = false;
-    $("uploadPhotoBtn").textContent = "Upload Photo";
-  }
-});
+      const commentsList = makeElement("div", "comment-list");
+      if (!postComments.length) {
+        commentsList.append(makeElement("p", "muted small", "No comments yet."));
+      } else {
+        postComments.forEach(comment => {
+          const item = makeElement("div", "comment");
+          const top = makeElement("div", "comment-top");
+          const commentProfile = makeElement("span", "profile-name", "Kaybgram member");
+          top.append(commentProfile);
+          const commentDate = makeElement("span", "small muted", formatDate(comment.created_at));
+          top.append(commentDate);
+          item.append(top, makeElement("div", "", comment.content || ""));
 
-$("profileForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  hideStatus("profileStatus");
-  if (!currentUser) {
-    showStatus("profileStatus", "Please sign in first.", true);
-    return;
-  }
+          if (currentUser && comment.user_id === currentUser.id) {
+            const deleteComment = makeElement("button", "btn danger tiny", "Delete comment");
+            deleteComment.type = "button";
+            deleteComment.style.marginTop = "7px";
+            deleteComment.addEventListener("click", async () => {
+              const { error } = await client.from("comments").delete()
+                .eq("id", comment.id).eq("user_id", currentUser.id);
+              if (error) showStatus("feedStatus", "Could not delete comment: " + error.message, "error");
+              else await loadPosts();
+            });
+            item.append(deleteComment);
+          }
+          commentsList.append(item);
+        });
+      }
 
-  const rawAvatarUrl = $("avatarUrl").value.trim();
-  if (rawAvatarUrl && !validImageUrl(rawAvatarUrl)) {
-    showStatus("profileStatus", "Please use a valid public image URL beginning with https://.", true);
-    return;
-  }
+      const commentForm = makeElement("form", "comment-form");
+      const commentInput = makeElement("textarea", "field");
+      commentInput.maxLength = 1000;
+      commentInput.placeholder = "Write a comment...";
+      commentInput.setAttribute("aria-label", "Write a comment");
+      commentInput.required = true;
+      const commentSubmit = makeElement("button", "btn", "Comment");
+      commentSubmit.type = "submit";
+      commentForm.append(commentInput, commentSubmit);
+      commentForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!currentUser) return showStatus("feedStatus", "Sign in to comment.", "error");
+        const text = commentInput.value.trim();
+        if (!text) return;
+        commentSubmit.disabled = true;
+        try {
+          const { error } = await client.from("comments").insert({
+            post_id: post.id,
+            user_id: currentUser.id,
+            content: text
+          });
+          if (error) throw error;
+          await createNotification(post.user_id, "comment", usernameFor(currentProfile, currentUser.email) + " commented on your post.", post.id);
+          await loadPosts();
+        } catch (error) {
+          showStatus("feedStatus", "Could not add comment: " + error.message, "error");
+          commentSubmit.disabled = false;
+        }
+      });
 
-  $("saveProfileBtn").disabled = true;
-  try {
-    await saveProfileData(rawAvatarUrl ? validImageUrl(rawAvatarUrl) : "");
-    showStatus("profileStatus", "Your profile was saved successfully!");
-  } catch (error) {
-    showStatus("profileStatus", "Could not save your profile: " + error.message, true);
-  } finally {
-    $("saveProfileBtn").disabled = false;
-  }
-});
+      commentsArea.append(commentsList);
+      if (currentUser) commentsArea.append(commentForm);
+      else commentsArea.append(makeElement("p", "muted small", "Sign in to leave a comment."));
+      card.append(head, content, actions, commentsArea);
+      return card;
+    }
 
-/* Authentication */
-$("authForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  hideStatus("authStatus");
-  const email = $("email").value.trim();
-  const password = $("password").value;
-  $("signInBtn").disabled = true;
-  $("signUpBtn").disabled = true;
-
-  try {
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    currentUser = data.user;
-    updateAuthUI();
-    await loadMyProfile();
-    showStatus("authStatus", "You are signed in successfully.");
-    await loadPosts();
-    await loadNotifications();
-    await loadMessageCount();
-  } catch (error) {
-    showStatus("authStatus", error.message || "Sign-in failed.", true);
-  } finally {
-    $("signInBtn").disabled = false;
-    $("signUpBtn").disabled = false;
-  }
-});
-
-$("signUpBtn").addEventListener("click", async () => {
-  hideStatus("authStatus");
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  if (!email || password.length < 6) {
-    showStatus("authStatus", "Enter your email and a password of at least 6 characters.", true);
-    return;
-  }
-
-  $("signUpBtn").disabled = true;
-  $("signInBtn").disabled = true;
-
-  try {
-    const { data, error } = await client.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: "https://kayblog1.github.io/kaybgram-new/" }
+    $("authForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = $("authEmail").value.trim();
+      const password = $("authPassword").value;
+      $("signInBtn").disabled = true;
+      hideStatus("authStatus");
+      try {
+        const { error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        showStatus("authStatus", "You are signed in.", "success");
+      } catch (error) {
+        showStatus("authStatus", "Sign in failed: " + error.message, "error");
+      } finally {
+        $("signInBtn").disabled = false;
+      }
     });
-    if (error) throw error;
 
-    if (data.session && data.user) {
-      currentUser = data.user;
+    $("signUpBtn").addEventListener("click", async () => {
+      const email = $("authEmail").value.trim();
+      const password = $("authPassword").value;
+      if (!email || !password) {
+        showStatus("authStatus", "Enter your email and password first, then tap Create account.", "error");
+        return;
+      }
+      if (password.length < 6) {
+        showStatus("authStatus", "Your password must be at least 6 characters.", "error");
+        return;
+      }
+      $("signUpBtn").disabled = true;
+      hideStatus("authStatus");
+      try {
+        const { data, error } = await client.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.session) {
+          showStatus("authStatus", "Account created. You are signed in.", "success");
+        } else {
+          showStatus("authStatus", "Account created. Check your email to confirm it, then sign in.", "success");
+        }
+      } catch (error) {
+        showStatus("authStatus", "Could not create account: " + error.message, "error");
+      } finally {
+        $("signUpBtn").disabled = false;
+      }
+    });
+
+    $("signOutBtn").addEventListener("click", async () => {
+      const { error } = await client.auth.signOut();
+      if (error) showStatus("authStatus", "Could not sign out: " + error.message, "error");
+      else {
+        showStatus("authStatus", "You have signed out.", "success");
+        $("messages").classList.add("hidden");
+        $("notifications").classList.add("hidden");
+      }
+    });
+
+    $("postForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!currentUser) return showStatus("postStatus", "Please sign in first.", "error");
+      const content = $("caption").value.trim();
+      if (!content) return;
+      const button = $("publishBtn");
+      button.disabled = true;
+      hideStatus("postStatus");
+      try {
+        const { error } = await client.from("posts").insert({
+          user_id: currentUser.id,
+          content
+        });
+        if (error) throw error;
+        $("caption").value = "";
+        showStatus("postStatus", "Your post has been published.", "success");
+        await loadPosts();
+      } catch (error) {
+        showStatus("postStatus", "Could not publish post: " + error.message, "error");
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // PRIVATE MESSAGES
+    async function loadMembers() {
+      if (!currentUser) {
+        showStatus("messagesStatus", "Please sign in to send private messages.", "error");
+        return;
+      }
+
+      const select = $("messageMember");
+      const oldSelection = select.value;
+      select.replaceChildren(makeElement("option", "", "Loading members..."));
+      hideStatus("messagesStatus");
+
+      const { data, error } = await client
+        .from("profiles")
+        .select("user_id,display_name,bio,avatar_url")
+        .order("display_name", { ascending: true });
+
+      if (error) {
+        select.replaceChildren(makeElement("option", "", "Could not load members"));
+        showStatus("messagesStatus", "Could not load members: " + error.message, "error");
+        return;
+      }
+
+      const members = (data || []).filter(p => p.user_id && p.user_id !== currentUser.id);
+      select.replaceChildren();
+      if (!members.length) {
+        select.append(makeElement("option", "", "No other members yet"));
+        select.value = "";
+        $("conversation").replaceChildren(makeElement("p", "muted small", "When other members join Kaybgram, you can message them here."));
+        return;
+      }
+
+      select.append(makeElement("option", "", "Choose a member..."));
+      members.forEach(member => {
+        const option = makeElement("option", "", usernameFor(member));
+        option.value = member.user_id;
+        select.append(option);
+      });
+
+      if (oldSelection && members.some(m => m.user_id === oldSelection)) {
+        select.value = oldSelection;
+      }
+      if (select.value) {
+        const chosen = members.find(m => m.user_id === select.value);
+        selectedMemberName = usernameFor(chosen);
+        await loadConversation();
+      } else {
+        $("conversation").replaceChildren(makeElement("p", "muted small", "Choose a member to view your conversation."));
+      }
+    }
+
+    async function loadConversation() {
+      if (!currentUser) return;
+      const recipientId = $("messageMember").value;
+      const conversation = $("conversation");
+      if (!recipientId) {
+        conversation.replaceChildren(makeElement("p", "muted small", "Choose a member to view your conversation."));
+        return;
+      }
+
+      const option = $("messageMember").selectedOptions[0];
+      selectedMemberName = option ? option.textContent : "Kaybgram member";
+      conversation.replaceChildren(makeElement("p", "muted small", "Loading conversation..."));
+      hideStatus("messagesStatus");
+
+      const [sentResult, receivedResult] = await Promise.all([
+        client.from("messages")
+          .select("id,sender_id,recipient_id,content,created_at,read_at")
+          .eq("sender_id", currentUser.id)
+          .eq("recipient_id", recipientId)
+          .order("created_at", { ascending: true }),
+        client.from("messages")
+          .select("id,sender_id,recipient_id,content,created_at,read_at")
+          .eq("sender_id", recipientId)
+          .eq("recipient_id", currentUser.id)
+          .order("created_at", { ascending: true })
+      ]);
+
+      if (sentResult.error || receivedResult.error) {
+        conversation.replaceChildren();
+        const error = sentResult.error || receivedResult.error;
+        showStatus("messagesStatus", "Could not load messages: " + error.message, "error");
+        return;
+      }
+
+      const messages = [...(sentResult.data || []), ...(receivedResult.data || [])]
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      conversation.replaceChildren();
+      if (!messages.length) {
+        conversation.append(makeElement("p", "muted small", "No messages yet. Say hello to " + selectedMemberName + "!"));
+      } else {
+        messages.forEach(message => {
+          const mine = message.sender_id === currentUser.id;
+          const row = makeElement("div", "message-row" + (mine ? " mine" : ""));
+          const bubble = makeElement("div", "message-bubble");
+          bubble.append(
+            makeElement("div", "", message.content || ""),
+            makeElement("div", "message-meta", (mine ? "You" : selectedMemberName) + " · " + formatDate(message.created_at))
+          );
+          row.append(bubble);
+          conversation.append(row);
+        });
+      }
+
+      const unreadIds = messages
+        .filter(m => m.recipient_id === currentUser.id && !m.read_at)
+        .map(m => m.id);
+
+      if (unreadIds.length) {
+        const { error } = await client.from("messages")
+          .update({ read_at: new Date().toISOString() })
+          .in("id", unreadIds)
+          .eq("recipient_id", currentUser.id);
+        if (error) console.warn("Could not mark messages as read:", error.message);
+      }
+
+      conversation.scrollTop = conversation.scrollHeight;
+    }
+
+    $("messageMember").addEventListener("change", loadConversation);
+
+    $("refreshMembers").addEventListener("click", async () => {
+      await loadMembers();
+    });
+
+    $("refreshConversation").addEventListener("click", loadConversation);
+
+    $("messageForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!currentUser) {
+        showStatus("messagesStatus", "Please sign in first.", "error");
+        return;
+      }
+
+      const recipientId = $("messageMember").value;
+      const content = $("messageText").value.trim();
+      if (!recipientId) {
+        showStatus("messagesStatus", "Choose a member before sending a message.", "error");
+        return;
+      }
+      if (!content) return;
+
+      const button = $("sendMessageBtn");
+      button.disabled = true;
+      hideStatus("messagesStatus");
+
+      try {
+        const { error } = await client.from("messages").insert({
+          sender_id: currentUser.id,
+          recipient_id: recipientId,
+          content
+        });
+        if (error) throw error;
+        $("messageText").value = "";
+        showStatus("messagesStatus", "Message sent.", "success");
+        await loadConversation();
+      } catch (error) {
+        showStatus("messagesStatus", "Could not send message: " + error.message, "error");
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("refreshFeed").addEventListener("click", loadPosts);
+    $("refreshNotifications").addEventListener("click", loadNotifications);
+
+    // Show a section when its navigation link is used.
+    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+      link.addEventListener("click", async (event) => {
+        const targetId = link.getAttribute("href").slice(1);
+        const target = $(targetId);
+        if (!target) return;
+
+        if (["notifications", "messages", "myProfile", "create"].includes(targetId) && !currentUser) {
+          event.preventDefault();
+          showStatus("authStatus", "Please sign in to use this feature.", "error");
+          $("account").scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+
+        if (["notifications", "messages", "myProfile", "create"].includes(targetId)) {
+          target.classList.remove("hidden");
+        }
+        if (targetId === "notifications") await loadNotifications();
+        if (targetId === "messages") await loadMembers();
+      });
+    });
+
+    async function startKaybgram() {
+      const { data, error } = await client.auth.getSession();
+      if (error) console.warn("Session check:", error.message);
+      currentUser = data?.session?.user || null;
       updateAuthUI();
-      await loadMyProfile();
-      showStatus("authStatus", "Your account has been created and you are signed in.");
-      await loadPosts();
-      await loadNotifications();
-      await loadMessageCount();
-    } else {
-      showStatus("authStatus", "Account created. Check your email for the confirmation link, then sign in.");
-    }
-  } catch (error) {
-    showStatus("authStatus", error.message || "Account creation failed.", true);
-  } finally {
-    $("signUpBtn").disabled = false;
-    $("signInBtn").disabled = false;
-  }
-});
 
-$("signOutBtn").addEventListener("click", async () => {
-  const { error } = await client.auth.signOut();
-  if (error) {
-    showStatus("authStatus", error.message || "Could not sign out.", true);
-    return;
-  }
-
-  currentUser = null;
-  currentProfile = null;
-  updateAuthUI();
-  showStatus("authStatus", "You have signed out.");
-  await loadPosts();
-  await loadNotifications();
-  await loadMessageCount();
-});
-
-/* Publish posts */
-$("postForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  hideStatus("postStatus");
-
-  if (!currentUser) {
-    showStatus("postStatus", "Please sign in before publishing.", true);
-    return;
-  }
-
-  const content = $("postContent").value.trim();
-  if (!content) {
-    showStatus("postStatus", "Write something before publishing.", true);
-    return;
-  }
-
-  $("publishBtn").disabled = true;
-  try {
-    const { error } = await client.from("posts").insert({
-      user_id: currentUser.id,
-      username: usernameFor(currentUser),
-      content
-    });
-    if (error) throw error;
-
-    $("postContent").value = "";
-    showStatus("postStatus", "Your post was published!");
-    await loadPosts();
-    $("feed").scrollIntoView({ behavior: "smooth" });
-  } catch (error) {
-    showStatus("postStatus", "Could not publish: " + error.message, true);
-  } finally {
-    $("publishBtn").disabled = false;
-  }
-});
-
-/* Navigation */
-document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-  link.addEventListener("click", event => {
-    const targetId = link.getAttribute("href").slice(1);
-    const target = $(targetId);
-    if (!target) return;
-
-    const privatePanels = ["notifications", "messages", "myProfile", "create"];
-    if (privatePanels.includes(targetId) && !currentUser) {
-      event.preventDefault();
-      showStatus("authStatus", "Please sign in to use this feature.", true);
-      $("account").scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-
-    if (privatePanels.includes(targetId)) {
-      event.preventDefault();
-      target.classList.remove("hidden");
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      if (targetId === "notifications") loadNotifications();
-      if (targetId === "messages") loadMessageMembers();
-    }
-  });
-});
-
-/* Start website and restore saved login */
-async function startKaybgram() {
-  try {
-    const { data, error } = await client.auth.getSession();
-    if (error) throw error;
-    currentUser = data.session?.user || null;
-    updateAuthUI();
-
-    if (currentUser) {
-      try {
-        await loadMyProfile();
-      } catch (profileError) {
-        showStatus("profileStatus", "Could not load your profile: " + profileError.message, true);
-      }
-    }
-
-    await loadPosts();
-    await loadNotifications();
-    await loadMessageCount();
-  } catch (error) {
-    showStatus("feedStatus", "Could not connect to Kaybgram: " + error.message, true);
-  }
-}
-
-client.auth.onAuthStateChange((_event, session) => {
-  currentUser = session?.user || null;
-  updateAuthUI();
-
-  if (currentUser) {
-    setTimeout(async () => {
-      try {
+      if (currentUser) {
         await loadMyProfile();
         await loadPosts();
-        await loadNotifications();
-        await loadMessageCount();
-      } catch (error) {
-        showStatus("profileStatus", "Could not load your profile: " + error.message, true);
+      } else {
+        await loadPosts();
       }
-    }, 0);
-  } else {
-    currentProfile = null;
-    loadPosts();
-    loadNotifications();
-    loadMessageCount();
-  }
-});
+    }
 
-startKaybgram();
-</script>
+    client.auth.onAuthStateChange(async (_event, session) => {
+      currentUser = session?.user || null;
+      updateAuthUI();
+      if (currentUser) {
+        await loadMyProfile();
+        await loadPosts();
+      } else {
+        currentProfile = null;
+        $("myDisplayName").textContent = "Your profile";
+        $("myBioPreview").textContent = "Sign in to edit your profile.";
+        $("myAvatar").src = "https://placehold.co/100x100/14223a/ffffff?text=K";
+        $("postsList").replaceChildren(makeElement("div", "card muted", "Sign in to publish posts, like, comment, and follow members."));
+        await loadPosts();
+      }
+    });
+
+    startKaybgram();
+  </script>
 </body>
 </html>
