@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1877f2">
+  <meta name="description" content="Kaybgram helps you connect with friends, share moments and build community.">
+  <title>Kaybgram - Connect with Everyone</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1c1e21;
+      line-height: 1.5;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 14px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 8px #00000010;
+    }
+
+    .logo {
+      color: #1877f2;
+      font-size: 30px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 11px 18px;
+      border-radius: 8px;
+      border: none;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .blue {
+      background: #1877f2;
+      color: #ffffff;
+    }
+
+    .light {
+      background: #e7f0ff;
+      color: #1877f2;
+    }
+
+    .hero {
+      max-width: 1100px;
+      margin: 45px auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+      gap: 45px;
+    }
+
+    .hero h1 {
+      color: #1877f2;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: 1.12;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      color: #606770;
+      font-size: 19px;
+      margin-bottom: 25px;
+      max-width: 520px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px #00000012;
+    }
+
+    .preview h2 {
+      color: #1877f2;
+      margin-bottom: 16px;
+    }
+
+    .sample-post {
+      border: 1px solid #e4e6eb;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 14px;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: #dbeafe;
+      color: #1877f2;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .muted {
+      color: #65676b;
+      font-size: 13px;
+    }
+
+    .post-text {
+      margin: 10px 0;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 10px;
+      border-top: 1px solid #e4e6eb;
+      color: #1877f2;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .features {
+      background: #ffffff;
+      padding: 45px 6%;
+      text-align: center;
+    }
+
+    .features h2 {
+      color: #1877f2;
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .features-intro {
+      color: #65676b;
+      margin-bottom: 30px;
+    }
+
+    .feature-grid {
+      max-width: 1100px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature {
+      background: #f0f6ff;
+      border-radius: 12px;
+      padding: 25px 18px;
+    }
+
+    .feature .emoji {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+
+    .feature h3 {
+      margin-bottom: 8px;
+    }
+
+    .feature p {
+      color: #65676b;
+      font-size: 14px;
+    }
+
+    footer {
+      padding: 25px 15px;
+      text-align: center;
+      color: #65676b;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      header {
+        padding: 12px 4%;
+      }
+
+      .logo {
+        font-size: 26px;
+      }
+
+      .button {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        margin: 25px auto;
+      }
+
+      .hero p {
+        font-size: 17px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .features {
+        padding: 35px 20px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a class="logo" href="index.html">Kaybgram</a>
+
+    <div class="header-actions">
+      <a class="button light" href="#about">Explore</a>
+      <a class="button blue" href="#join">Join Kaybgram</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="about">
+
+      <div>
+        <h1>Bring your world closer.</h1>
+
+        <p>
+          Meet new people, share your favourite moments,
+          discover communities and stay connected with
+          the people who matter to you.
+        </p>
+
+        <div class="hero-buttons" id="join">
+          <a class="button blue" href="#features">
+            Discover Kaybgram
+          </a>
+
+          <a class="button light" href="#features">
+            Learn more
+          </a>
+        </div>
+      </div>
+
+      <div class="preview">
+        <h2>Your community, together</h2>
+
+        <div class="sample-post">
+          <div class="person">
+            <div class="avatar">K</div>
+            <div>
+              <strong>Kaybgram Community</strong>
+              <div class="muted">Welcome to a new beginning</div>
+            </div>
+          </div>
+
+          <p class="post-text">
+            Every great connection starts somewhere.
+            Welcome to Kaybgram! 💙
+          </p>
+
+          <div class="post-actions">
+            <span>♡ Like</span>
+            <span>Comment</span>
+            <span>Share</span>
+          </div>
+        </div>
+
+        <div class="sample-post">
+          <div class="person">
+            <div class="avatar">F</div>
+            <div>
+              <strong>Friends and Family</strong>
+              <div class="muted">Your people, your world</div>
+            </div>
+          </div>
+
+          <p class="post-text">
+            Share a moment, start a conversation,
+            and make every connection count.
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="features" id="features">
+      <h2>Everything starts with connection</h2>
+
+      <p class="features-intro">
+        A fresh space to express yourself and connect.
+      </p>
+
+      <div class="feature-grid">
+
+        <div class="feature">
+          <div class="emoji">👥</div>
+          <h3>Find Your People</h3>
+          <p>Connect with friends and meet people who share your interests.</p>
+        </div>
+
+        <div class="feature">
+          <div class="emoji">📸</div>
+          <h3>Share Your Moments</h3>
+          <p>Give your stories, ideas and special moments a place to shine.</p>
+        </div>
+
+        <div class="feature">
+          <div class="emoji">💬</div>
+          <h3>Start Conversations</h3>
+          <p>Discover new perspectives and build meaningful connections.</p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Kaybgram. Connect with care.
+  </footer>
+
+</body>
+</html>
