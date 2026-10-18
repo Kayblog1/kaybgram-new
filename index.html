@@ -4,158 +4,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#080c14">
 <title>Kaybgram - Connect Your World</title>
 <style>
 :root {
-  --blue:#1877f2;
-  --dark:#172033;
-  --muted:#657087;
-  --line:#e5eaf2;
-  --bg:#f4f7fb;
+  --blue: #3b82f6;
+  --blue-bright: #60a5fa;
+  --dark: #f1f5f9;
+  --muted: #94a3b8;
+  --line: #263449;
+  --bg: #080c14;
 }
-* { box-sizing:border-box; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--bg);
-  color:var(--dark);
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(37,99,235,.15), transparent 34rem),
+    radial-gradient(ellipse at 90% 16%, rgba(59,130,246,.08), transparent 28rem),
+    var(--bg);
+  color: var(--dark);
+  min-height: 100vh;
 }
-button,input,textarea { font:inherit; }
-button { cursor:pointer; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; transition: .16s ease; }
+button:hover { transform: translateY(-1px); }
 header {
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  position:sticky;
-  top:0;
-  z-index:5;
+  background: rgba(8,12,20,.92);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(16px);
 }
 .nav {
-  max-width:1100px;
-  margin:auto;
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
+  max-width: 1180px;
+  margin: auto;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 .logo {
-  color:var(--blue);
-  font-size:27px;
-  font-weight:800;
+  color: var(--blue-bright);
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -.8px;
 }
-.nav-actions,.buttons {
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:9px;
+.nav-actions, .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
 }
 .container {
-  max-width:1100px;
-  margin:26px auto;
-  padding:0 16px;
+  max-width: 1180px;
+  margin: 28px auto;
+  padding: 0 18px;
 }
 .hero {
-  padding:34px 26px;
-  border:1px solid #dceaff;
-  border-radius:20px;
-  background:linear-gradient(135deg,#e8f2ff,#fff);
-  margin-bottom:24px;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px,5vw,52px);
+  border: 1px solid #294875;
+  border-radius: 24px;
+  background: linear-gradient(120deg,#162b4c,#0c1422 65%,#132542);
+  margin-bottom: 24px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.22);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -70px;
+  top: -95px;
+  border-radius: 50%;
+  border: 1px solid rgba(96,165,250,.18);
+  box-shadow: 0 0 0 28px rgba(96,165,250,.035),
+              0 0 0 58px rgba(96,165,250,.025);
+  pointer-events: none;
 }
 .hero h1 {
-  font-size:clamp(30px,5vw,44px);
-  line-height:1.15;
-  margin:0 0 12px;
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  font-size: clamp(32px,5vw,52px);
+  line-height: 1.08;
+  letter-spacing: -1.4px;
+  margin: 0 0 14px;
 }
-p { line-height:1.65; }
-.muted { color:var(--muted); }
+.hero p { position: relative; z-index: 1; max-width: 650px; }
+.hero .buttons { position: relative; z-index: 1; margin-top: 20px; }
+p { line-height: 1.65; }
+.muted { color: var(--muted); }
 .layout {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 285px;
-  gap:20px;
-  align-items:start;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 300px;
+  gap: 20px;
+  align-items: start;
 }
 .card {
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:15px;
-  padding:21px;
-  margin-bottom:18px;
-  box-shadow:0 3px 12px #18284608;
+  background: linear-gradient(160deg,#101827,#0c1320);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.14);
 }
-h2 { font-size:21px; margin:0 0 14px; }
-h3 { font-size:16px; margin:0 0 8px; }
+h2 { font-size: 21px; letter-spacing: -.3px; margin: 0 0 12px; }
+h3 { font-size: 16px; margin: 0 0 8px; }
+label { color: #dbeafe; font-size: 14px; font-weight: 650; }
 .field {
-  display:block;
-  width:100%;
-  padding:13px;
-  border:1px solid #d9e0eb;
-  border-radius:9px;
-  margin:7px 0 14px;
-  background:#fff;
-  color:var(--dark);
+  display: block;
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #334155;
+  border-radius: 11px;
+  margin: 8px 0 16px;
+  background: #080f1b;
+  color: var(--dark);
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
+.field::placeholder { color: #64748b; }
 .field:focus {
-  outline:2px solid #c7ddff;
-  border-color:var(--blue);
+  border-color: var(--blue-bright);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.17);
 }
-textarea.field { min-height:110px; resize:vertical; }
+textarea.field { min-height: 125px; resize: vertical; }
 .btn {
-  padding:12px 16px;
-  border:0;
-  border-radius:9px;
-  background:var(--blue);
-  color:#fff;
-  font-weight:700;
+  padding: 12px 17px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: linear-gradient(135deg,#3b82f6,#2563eb);
+  color: #fff;
+  font-weight: 750;
+  box-shadow: 0 5px 16px rgba(37,99,235,.18);
 }
-.btn-secondary { background:#eaf2ff; color:var(--blue); }
-.btn-light { background:#eef1f6; color:var(--dark); }
-.btn-small { padding:9px 12px; font-size:14px; }
-.btn:disabled { opacity:.6; cursor:wait; }
-.full { width:100%; }
-.hidden { display:none!important; }
+.btn:hover { background: linear-gradient(135deg,#60a5fa,#3b82f6); }
+.btn-secondary {
+  background: #132440;
+  color: #bfdbfe;
+  border-color: #294875;
+  box-shadow: none;
+}
+.btn-secondary:hover { background: #1b3154; }
+.btn-light {
+  background: #1b2638;
+  color: #e2e8f0;
+  border-color: #334155;
+  box-shadow: none;
+}
+.btn-light:hover { background: #26364e; }
+.btn-small { padding: 9px 12px; font-size: 14px; }
+.btn:disabled { opacity: .6; cursor: wait; transform: none; }
+.full { width: 100%; }
+.hidden { display: none !important; }
 .status {
-  margin-top:12px;
-  padding:12px;
-  border-radius:9px;
-  background:#eef5ff;
-  color:#174b91;
-  line-height:1.5;
-  overflow-wrap:anywhere;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid #294875;
+  border-radius: 11px;
+  background: #101f36;
+  color: #bfdbfe;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
-.status.error { background:#fff0f0; color:#a21b1b; }
-.post {
-  border-bottom:1px solid var(--line);
-  padding:17px 0;
+.status.error {
+  background: #321820;
+  color: #fecaca;
+  border-color: #7f2938;
 }
-.post:first-child { padding-top:0; }
-.post:last-child { border-bottom:0; padding-bottom:0; }
-.post-top { display:flex; gap:10px; align-items:center; }
+.post { border-bottom: 1px solid var(--line); padding: 19px 0; }
+.post:first-child { padding-top: 0; }
+.post:last-child { border-bottom: 0; padding-bottom: 0; }
+.post-top {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  margin-bottom: 12px;
+}
 .avatar {
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-  background:#e7f0ff;
-  color:var(--blue);
-  font-weight:800;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#2563eb,#60a5fa);
+  color: #fff;
+  font-weight: 850;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
 }
-.post-name { font-weight:700; overflow-wrap:anywhere; }
-.post-date { font-size:12px; color:var(--muted); margin-top:4px; }
-.post-content { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.65; }
-.empty { text-align:center; color:var(--muted); padding:24px 5px; line-height:1.6; }
-.feature { padding:12px 0; border-bottom:1px solid var(--line); }
-.feature:last-child { border-bottom:0; }
-footer { text-align:center; padding:26px 12px; color:var(--muted); font-size:13px; }
-@media(max-width:760px) {
-  .layout { grid-template-columns:1fr; }
-  .nav { padding:13px; }
-  .logo { font-size:23px; }
-  .container { margin-top:16px; padding:0 12px; }
-  .hero { padding:25px 18px; }
-  .card { padding:17px; }
+.post-name { font-weight: 750; overflow-wrap: anywhere; }
+.post-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.post-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+  color: #e2e8f0;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 8px;
+  line-height: 1.7;
+}
+.feature { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.feature:last-child { border-bottom: 0; }
+.feature h3 { color: #dbeafe; }
+footer {
+  text-align: center;
+  padding: 28px 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+#feed { scroll-margin-top: 90px; }
+@media (max-width:760px) {
+  .layout { grid-template-columns: 1fr; }
+  .nav { padding: 13px 14px; }
+  .logo { font-size: 24px; }
+  .container { margin-top: 16px; padding: 0 12px; }
+  .hero { padding: 28px 20px; border-radius: 19px; }
+  .hero h1 { letter-spacing: -.8px; }
+  .card { padding: 18px; border-radius: 15px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
 }
 </style>
 </head>
@@ -163,7 +242,7 @@ footer { text-align:center; padding:26px 12px; color:var(--muted); font-size:13p
 
 <header>
   <div class="nav">
-    <div class="logo">Kaybgram</div>
+    <div class="logo">Kaybgram<span style="color:#f1f5f9">.</span></div>
     <div class="nav-actions">
       <span id="navUser" class="muted hidden"></span>
       <button id="navSignIn" class="btn btn-secondary btn-small"
@@ -235,8 +314,8 @@ footer { text-align:center; padding:26px 12px; color:var(--muted); font-size:13p
       </div>
 
       <div id="feed" class="card">
-        <h2>Kaybgram feed</h2>
-        <p class="muted">See what's happening in your community.</p>
+        <h2>Latest from your world</h2>
+        <p class="muted">Fresh thoughts and updates from the Kaybgram community.</p>
         <div id="postsList"><div class="empty">Loading posts...</div></div>
         <button id="refreshButton" class="btn btn-secondary full hidden"
           type="button" onclick="loadPosts()">Refresh feed</button>
@@ -562,8 +641,6 @@ async function loadPosts() {
 }
 
 async function startKaybgram() {
-  // If an email confirmation link returned to this page with tokens,
-  // the Supabase client detects the URL session.
   const {data, error} = await client.auth.getSession();
 
   if (error) console.error("Session check failed:", error.message);
