@@ -63,7 +63,10 @@ background:#172942;color:#cfe1ff;font-size:14px;overflow-wrap:anywhere}
 .post-head{display:flex;align-items:center;gap:11px}
 .avatar{width:43px;height:43px;border-radius:50%;
 background:linear-gradient(135deg,#3985ff,#7c5cff);
-display:grid;place-items:center;flex-shrink:0;font-weight:bold;color:white}
+display:grid;place-items:center;flex-shrink:0;font-weight:bold;color:white;
+overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile-avatar{width:78px;height:78px;font-size:25px}
 .post-name{font-weight:bold;overflow-wrap:anywhere}
 .post-date{color:var(--muted);font-size:12px}
 .post-content{white-space:pre-wrap;margin:15px 0;overflow-wrap:anywhere}
@@ -86,6 +89,10 @@ font-size:12px;color:var(--muted);margin-bottom:5px}
 resize:vertical;padding:10px 12px;background:#0b1220;color:white;
 border:1px solid var(--border);border-radius:10px}
 .comment-input:focus{outline:1px solid var(--blue)}
+.profile-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-size:21px;font-weight:bold;overflow-wrap:anywhere}
+.profile-bio{white-space:pre-wrap;overflow-wrap:anywhere}
 footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:13px}
 @media(max-width:780px){
 .page{grid-template-columns:1fr;margin-top:16px}
@@ -100,6 +107,7 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
     <div class="brand">KAYB<span>GRAM</span></div>
     <nav>
       <a href="#home">Home</a>
+      <a href="#myProfile">My Profile</a>
       <a href="#create">Create</a>
       <a href="#feed">Community</a>
       <a href="#account">Account</a>
@@ -134,6 +142,39 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
       <button class="btn secondary" id="signOutBtn" type="button">Sign out</button>
     </div>
     <div id="authStatus" class="status" role="status"></div>
+  </section>
+
+  <!-- NEW: Profile display and editor -->
+  <section class="card hidden" id="myProfile">
+    <h2>My Profile</h2>
+    <div class="profile-top">
+      <div class="avatar profile-avatar" id="profileAvatar">K</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileDisplayName">Kaybgram member</div>
+        <div class="muted small" id="profileEmail"></div>
+        <p class="profile-bio muted" id="profileBioDisplay">Add a little information about yourself.</p>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:18px 0"></div>
+    <h2>Edit Profile</h2>
+    <p class="muted small">Your name and bio will be saved to your Kaybgram profile.</p>
+    <form id="profileForm">
+      <label for="displayName" class="small">Display name</label>
+      <input class="field" id="displayName" maxlength="80" placeholder="Your name" required>
+
+      <label for="bio" class="small">Bio</label>
+      <textarea class="field" id="bio" maxlength="300" placeholder="Tell the community about yourself (up to 300 characters)"></textarea>
+
+      <label for="avatarUrl" class="small">Profile picture URL (optional)</label>
+      <input class="field" id="avatarUrl" type="url" maxlength="1000" placeholder="https://example.com/your-photo.jpg">
+      <p class="muted small">Enter a public image URL beginning with https://. Direct photo uploads can be added later.</p>
+
+      <div class="actions">
+        <button class="btn" id="saveProfileBtn" type="submit">Save Profile</button>
+      </div>
+    </form>
+    <div id="profileStatus" class="status" role="status"></div>
   </section>
 
   <section class="card hidden" id="create">
@@ -171,12 +212,12 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
 <script>
 "use strict";
 
-// Your existing Kaybgram Supabase project.
 const SUPABASE_URL = "https://umjrpgnmcwnfmmwfbrwd.supabase.co";
 const SUPABASE_KEY = "sb_publishable_iCnIOgeRQSZ_fIW3qp6Jkw_eznCgmPq";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
+let currentProfile = null;
 let postsLoading = false;
 let reloadRequested = false;
 const $ = id => document.getElementById(id);
@@ -191,7 +232,8 @@ function hideStatus(id) {
   $(id).classList.remove("show", "error");
 }
 function usernameFor(user) {
-  return user?.user_metadata?.username ||
+  return currentProfile?.display_name?.trim() ||
+    user?.user_metadata?.username ||
     user?.user_metadata?.full_name ||
     user?.email?.split("@")[0] ||
     "Kaybgram member";
@@ -200,8 +242,10 @@ function updateAuthUI() {
   $("signedOut").classList.toggle("hidden", !!currentUser);
   $("signedIn").classList.toggle("hidden", !currentUser);
   $("create").classList.toggle("hidden", !currentUser);
+  $("myProfile").classList.toggle("hidden", !currentUser);
   $("userEmail").textContent = currentUser
     ? "Signed in as " + currentUser.email : "";
+  $("profileEmail").textContent = currentUser?.email || "";
 }
 function formatDate(value) {
   if (!value) return "";
@@ -213,6 +257,67 @@ function makeElement(tag, className, text) {
   if (className) el.className = className;
   if (text !== undefined) el.textContent = text;
   return el;
+}
+function validImageUrl(value) {
+  if (!value) return "";
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+function setAvatar(element, name, url) {
+  element.replaceChildren();
+  const safeUrl = validImageUrl(url);
+  if (safeUrl) {
+    const img = document.createElement("img");
+    img.src = safeUrl;
+    img.alt = (name || "Member") + "'s profile picture";
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => {
+      element.replaceChildren();
+      element.textContent = (name || "K").trim().charAt(0).toUpperCase() || "K";
+    };
+    element.appendChild(img);
+  } else {
+    element.textContent = (name || "K").trim().charAt(0).toUpperCase() || "K";
+  }
+}
+async function loadMyProfile() {
+  if (!currentUser) {
+    currentProfile = null;
+    return;
+  }
+
+  const { data, error } = await client
+    .from("profiles")
+    .select("user_id,display_name,bio,avatar_url")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  currentProfile = data || {
+    user_id: currentUser.id,
+    display_name: currentUser.user_metadata?.full_name ||
+      currentUser.user_metadata?.username ||
+      currentUser.email?.split("@")[0] || "Kaybgram member",
+    bio: "",
+    avatar_url: ""
+  };
+
+  $("displayName").value = currentProfile.display_name || "";
+  $("bio").value = currentProfile.bio || "";
+  $("avatarUrl").value = currentProfile.avatar_url || "";
+  renderMyProfile();
+}
+function renderMyProfile() {
+  const name = usernameFor(currentUser);
+  $("profileDisplayName").textContent = name;
+  $("profileBioDisplay").textContent =
+    currentProfile?.bio || "Add a little information about yourself.";
+  setAvatar($("profileAvatar"), name, currentProfile?.avatar_url);
 }
 
 async function loadPosts() {
@@ -239,8 +344,19 @@ async function loadPosts() {
 
     let likes = [];
     let comments = [];
+    let profiles = [];
 
-    // Your existing likes table.
+    // Load public profile details for people who posted in the feed.
+    const authorIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
+    if (authorIds.length) {
+      const { data, error: profilesError } = await client
+        .from("profiles")
+        .select("user_id,display_name,bio,avatar_url")
+        .in("user_id", authorIds);
+      if (profilesError) throw profilesError;
+      profiles = data || [];
+    }
+
     if (currentUser) {
       const { data, error: likesError } = await client
         .from("likes")
@@ -248,7 +364,6 @@ async function loadPosts() {
       if (likesError) throw likesError;
       likes = data || [];
 
-      // Load comments belonging to the posts currently in the feed.
       const postIds = posts.map(post => post.id);
       const { data: commentRows, error: commentsError } = await client
         .from("comments")
@@ -259,12 +374,15 @@ async function loadPosts() {
       comments = commentRows || [];
     }
 
+    const profilesByUser = new Map(
+      profiles.map(profile => [profile.user_id, profile])
+    );
     const likeCounts = new Map();
     const likedByMe = new Set();
     for (const like of likes) {
       const id = String(like.post_id);
       likeCounts.set(id, (likeCounts.get(id) || 0) + 1);
-      if (like.user_id === currentUser.id) likedByMe.add(id);
+      if (currentUser && like.user_id === currentUser.id) likedByMe.add(id);
     }
 
     const commentsByPost = new Map();
@@ -275,11 +393,13 @@ async function loadPosts() {
     }
 
     for (const post of posts) {
+      const profile = profilesByUser.get(post.user_id);
       container.appendChild(createPostCard(
         post,
         likeCounts.get(String(post.id)) || 0,
         likedByMe.has(String(post.id)),
-        commentsByPost.get(String(post.id)) || []
+        commentsByPost.get(String(post.id)) || [],
+        profile
       ));
     }
     hideStatus("feedStatus");
@@ -296,16 +416,16 @@ async function loadPosts() {
   }
 }
 
-function createPostCard(post, likeCount, liked, comments) {
+function createPostCard(post, likeCount, liked, comments, profile) {
   const card = makeElement("article", "post");
+  const displayName = profile?.display_name?.trim() || post.username || "Kaybgram member";
+  const avatarUrl = profile?.avatar_url || "";
   const head = makeElement("div", "post-head");
-  const avatar = makeElement("div", "avatar",
-    (post.username || "K").trim().charAt(0).toUpperCase() || "K");
+  const avatar = makeElement("div", "avatar");
+  setAvatar(avatar, displayName, avatarUrl);
   const details = makeElement("div");
-  details.appendChild(makeElement("div", "post-name",
-    post.username || "Kaybgram member"));
-  details.appendChild(makeElement("div", "post-date",
-    formatDate(post.created_at)));
+  details.appendChild(makeElement("div", "post-name", displayName));
+  details.appendChild(makeElement("div", "post-date", formatDate(post.created_at)));
   head.append(avatar, details);
   card.appendChild(head);
   card.appendChild(makeElement("div", "post-content", post.content || ""));
@@ -341,14 +461,12 @@ function createPostCard(post, likeCount, liked, comments) {
       if (result.error) throw result.error;
       await loadPosts();
     } catch (error) {
-      showStatus("feedStatus",
-        "Could not update your like: " + error.message, true);
+      showStatus("feedStatus", "Could not update your like: " + error.message, true);
       likeButton.disabled = false;
     }
   });
   actions.appendChild(likeButton);
 
-  // Comment button scrolls to this post's comment area.
   const commentButton = makeElement("button", "action-btn",
     "Comment (" + comments.length + ")");
   commentButton.type = "button";
@@ -357,8 +475,7 @@ function createPostCard(post, likeCount, liked, comments) {
   const shareButton = makeElement("button", "action-btn", "Share");
   shareButton.type = "button";
   shareButton.addEventListener("click", async () => {
-    const shareText = (post.username || "Kaybgram member") +
-      ": " + (post.content || "");
+    const shareText = displayName + ": " + (post.content || "");
     try {
       if (navigator.share) {
         await navigator.share({
@@ -379,11 +496,9 @@ function createPostCard(post, likeCount, liked, comments) {
   actions.appendChild(shareButton);
   card.appendChild(actions);
 
-  // Comments section.
   const commentSection = makeElement("section", "comments");
-  const commentHeading = makeElement("div", "comments-title",
-    "Comments (" + comments.length + ")");
-  commentSection.appendChild(commentHeading);
+  commentSection.appendChild(makeElement("div", "comments-title",
+    "Comments (" + comments.length + ")"));
 
   const commentList = makeElement("div", "comment-list");
   if (!currentUser) {
@@ -398,27 +513,25 @@ function createPostCard(post, likeCount, liked, comments) {
       const commentHead = makeElement("div", "comment-head");
       commentHead.appendChild(makeElement("span", "",
         comment.user_id === currentUser.id ? "You" : "Kaybgram member"));
-      commentHead.appendChild(makeElement("span", "",
-        formatDate(comment.created_at)));
+      commentHead.appendChild(makeElement("span", "", formatDate(comment.created_at)));
       item.appendChild(commentHead);
       item.appendChild(makeElement("div", "comment-text", comment.content));
 
-      // A user may delete only their own comment.
       if (comment.user_id === currentUser.id) {
         const deleteButton = makeElement("button", "action-btn", "Delete");
         deleteButton.type = "button";
         deleteButton.addEventListener("click", async () => {
           if (!confirm("Delete your comment?")) return;
           deleteButton.disabled = true;
-          const { error } = await client.from("comments").delete()
-            .eq("id", comment.id).eq("user_id", currentUser.id);
-          if (error) {
-            showStatus("feedStatus",
-              "Could not delete comment: " + error.message, true);
+          try {
+            const { error } = await client.from("comments").delete()
+              .eq("id", comment.id).eq("user_id", currentUser.id);
+            if (error) throw error;
+            await loadPosts();
+          } catch (error) {
+            showStatus("feedStatus", "Could not delete comment: " + error.message, true);
             deleteButton.disabled = false;
-            return;
           }
-          await loadPosts();
         });
         item.appendChild(deleteButton);
       }
@@ -431,8 +544,7 @@ function createPostCard(post, likeCount, liked, comments) {
   const commentInput = makeElement("textarea", "comment-input");
   commentInput.rows = 1;
   commentInput.maxLength = 2000;
-  commentInput.placeholder = currentUser
-    ? "Write a comment..." : "Sign in to comment";
+  commentInput.placeholder = currentUser ? "Write a comment..." : "Sign in to comment";
   commentInput.setAttribute("aria-label", "Write a comment");
   commentInput.disabled = !currentUser;
   const sendButton = makeElement("button", "btn", "Send");
@@ -456,15 +568,14 @@ function createPostCard(post, likeCount, liked, comments) {
       const { error } = await client.from("comments").insert({
         post_id: post.id,
         user_id: currentUser.id,
-        content: content
+        content
       });
       if (error) throw error;
       commentInput.value = "";
       showStatus("feedStatus", "Your comment was saved!");
       await loadPosts();
     } catch (error) {
-      showStatus("feedStatus",
-        "Could not save your comment: " + error.message, true);
+      showStatus("feedStatus", "Could not save your comment: " + error.message, true);
     } finally {
       sendButton.disabled = false;
     }
@@ -480,9 +591,59 @@ function createPostCard(post, likeCount, liked, comments) {
       $("account").scrollIntoView({ behavior: "smooth" });
     }
   });
-
   return card;
 }
+
+// Save or update the signed-in member's profile.
+$("profileForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  hideStatus("profileStatus");
+
+  if (!currentUser) {
+    showStatus("profileStatus", "Please sign in first.", true);
+    return;
+  }
+
+  const displayName = $("displayName").value.trim();
+  const bio = $("bio").value.trim();
+  const rawAvatarUrl = $("avatarUrl").value.trim();
+
+  if (!displayName) {
+    showStatus("profileStatus", "Please enter a display name.", true);
+    return;
+  }
+  if (rawAvatarUrl && !validImageUrl(rawAvatarUrl)) {
+    showStatus("profileStatus",
+      "Please use a valid public image URL beginning with https://.", true);
+    return;
+  }
+
+  $("saveProfileBtn").disabled = true;
+  try {
+    const profileData = {
+      user_id: currentUser.id,
+      display_name: displayName,
+      bio,
+      avatar_url: rawAvatarUrl ? validImageUrl(rawAvatarUrl) : "",
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await client.from("profiles").upsert(profileData, {
+      onConflict: "user_id"
+    });
+    if (error) throw error;
+
+    currentProfile = profileData;
+    renderMyProfile();
+    showStatus("profileStatus", "Your profile was saved successfully!");
+    await loadPosts();
+  } catch (error) {
+    showStatus("profileStatus",
+      "Could not save your profile: " + error.message, true);
+  } finally {
+    $("saveProfileBtn").disabled = false;
+  }
+});
 
 // Sign in.
 $("authForm").addEventListener("submit", async event => {
@@ -493,12 +654,11 @@ $("authForm").addEventListener("submit", async event => {
   $("signInBtn").disabled = true;
   $("signUpBtn").disabled = true;
   try {
-    const { data, error } = await client.auth.signInWithPassword({
-      email, password
-    });
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
     currentUser = data.user;
     updateAuthUI();
+    await loadMyProfile();
     showStatus("authStatus", "You are signed in successfully.");
     await loadPosts();
   } catch (error) {
@@ -532,6 +692,7 @@ $("signUpBtn").addEventListener("click", async () => {
     if (data.session && data.user) {
       currentUser = data.user;
       updateAuthUI();
+      await loadMyProfile();
       showStatus("authStatus", "Your account has been created and you are signed in.");
       await loadPosts();
     } else {
@@ -554,6 +715,7 @@ $("signOutBtn").addEventListener("click", async () => {
     return;
   }
   currentUser = null;
+  currentProfile = null;
   updateAuthUI();
   showStatus("authStatus", "You have signed out.");
   await loadPosts();
@@ -585,8 +747,7 @@ $("postForm").addEventListener("submit", async event => {
     await loadPosts();
     $("feed").scrollIntoView({ behavior: "smooth" });
   } catch (error) {
-    showStatus("postStatus",
-      "Could not publish: " + error.message, true);
+    showStatus("postStatus", "Could not publish: " + error.message, true);
   } finally {
     $("publishBtn").disabled = false;
   }
@@ -598,6 +759,15 @@ async function startKaybgram() {
     if (error) throw error;
     currentUser = data.session?.user || null;
     updateAuthUI();
+
+    if (currentUser) {
+      try {
+        await loadMyProfile();
+      } catch (profileError) {
+        showStatus("profileStatus",
+          "Could not load your profile: " + profileError.message, true);
+      }
+    }
     await loadPosts();
   } catch (error) {
     showStatus("feedStatus",
@@ -608,7 +778,19 @@ async function startKaybgram() {
 client.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
   updateAuthUI();
-  loadPosts();
+  // Load profile after auth changes without blocking the auth callback.
+  if (currentUser) {
+    loadMyProfile()
+      .then(() => loadPosts())
+      .catch(error => {
+        showStatus("profileStatus",
+          "Could not load your profile: " + error.message, true);
+        loadPosts();
+      });
+  } else {
+    currentProfile = null;
+    loadPosts();
+  }
 });
 
 startKaybgram();
