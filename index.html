@@ -15,7 +15,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
-button,input,textarea{font:inherit}
+button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 header{background:#0c1322;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
 .topbar{max-width:1100px;margin:auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
@@ -80,17 +80,35 @@ textarea.field{resize:vertical;min-height:90px}
 .follow-btn:hover{background:#22416c}
 .follow-btn.following{background:#172239;color:#b9c7df;border-color:#34435d}
 .follow-btn:disabled{opacity:.6;cursor:wait}
-#notificationCount{display:inline-block;color:#fff;background:#1765e8;border-radius:20px;padding:1px 7px;font-size:12px;font-weight:bold}
+#notificationCount,#messageCount{display:inline-block;color:#fff;background:#1765e8;border-radius:20px;padding:1px 7px;font-size:12px;font-weight:bold}
 .notification-item{padding:13px;margin:10px 0;border:1px solid var(--border);border-radius:10px;background:#0b1220;overflow-wrap:anywhere}
 .notification-item.unread{border-color:var(--blue);background:#142441}
 .notification-message{font-size:14px;margin-bottom:5px}
 .notification-date{color:var(--muted);font-size:12px}
 .notification-read{margin-top:8px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;color:white;background:var(--panel2)}
+
+/* Private Messages */
+.message-select{width:100%;padding:12px;color:white;background:#0b1220;border:1px solid var(--border);border-radius:10px;margin:8px 0}
+.message-list{display:flex;flex-direction:column;gap:10px;max-height:420px;min-height:100px;overflow-y:auto;padding:12px 0}
+.message-bubble{align-self:flex-start;max-width:88%;padding:11px 14px;border-radius:14px;background:#172239;overflow-wrap:anywhere;white-space:pre-wrap}
+.message-bubble.mine{align-self:flex-end;background:#1765e8;color:white}
+.message-meta{font-size:11px;opacity:.8;margin-top:5px}
+.message-compose{display:flex;gap:8px;align-items:flex-end}
+.message-compose textarea{flex:1;min-width:0;min-height:48px;max-height:140px;resize:vertical;padding:12px;color:white;background:#0b1220;border:1px solid var(--border);border-radius:10px}
+.message-compose textarea:focus{outline:1px solid var(--blue)}
+.message-help{font-size:12px;color:var(--muted)}
 footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:13px}
 @media(max-width:780px){
-.page{grid-template-columns:1fr;margin-top:16px}
-.sidebar{order:-1}.topbar{padding:12px}nav{gap:2px}
-nav a{padding:7px;font-size:13px}.card{padding:16px}
+  .page{grid-template-columns:1fr;margin-top:16px}
+  .sidebar{order:-1}
+  .topbar{padding:12px}
+  nav{gap:2px}
+  nav a{padding:7px;font-size:13px}
+  .card{padding:16px}
+}
+@media(max-width:480px){
+  .message-compose{flex-direction:column;align-items:stretch}
+  .message-compose .btn{width:100%}
 }
 </style>
 </head>
@@ -104,6 +122,7 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
       <a href="#create">Create</a>
       <a href="#feed">Community</a>
       <a href="#notifications">🔔 Notifications <span id="notificationCount"></span></a>
+      <a href="#messages">💬 Messages <span id="messageCount"></span></a>
       <a href="#account">Account</a>
     </nav>
   </div>
@@ -144,6 +163,31 @@ nav a{padding:7px;font-size:13px}.card{padding:16px}
     <div id="notificationStatus" class="status" role="status"></div>
     <div id="notificationList"><p class="muted small">Sign in to see your notifications.</p></div>
     <button class="btn secondary" id="refreshNotifications" type="button">Refresh notifications</button>
+  </section>
+
+  <section class="card hidden" id="messages">
+    <h2>💬 Private Messages</h2>
+    <p class="muted small">Send a private message to another Kaybgram member.</p>
+
+    <label for="messageMember" class="small">Choose a member</label>
+    <select class="message-select" id="messageMember">
+      <option value="">Sign in to see members</option>
+    </select>
+
+    <div class="actions">
+      <button class="btn secondary" id="refreshMessages" type="button">Refresh conversation</button>
+    </div>
+
+    <div id="messageStatus" class="status" role="status"></div>
+    <div id="messageList" class="message-list" aria-live="polite">
+      <p class="muted small">Choose a member to view messages.</p>
+    </div>
+
+    <form id="messageForm" class="message-compose">
+      <textarea id="messageText" maxlength="2000" placeholder="Write a private message..." aria-label="Write a private message" required></textarea>
+      <button class="btn" id="sendMessageBtn" type="submit">Send</button>
+    </form>
+    <p class="message-help">Messages are visible to the sender and receiver. Refresh the conversation to check for new replies.</p>
   </section>
 
   <section class="card hidden" id="myProfile">
@@ -219,6 +263,8 @@ let currentProfile = null;
 let postsLoading = false;
 let reloadRequested = false;
 let notificationsLoading = false;
+let messagesLoading = false;
+let messagesReloadRequested = false;
 
 const $ = id => document.getElementById(id);
 
@@ -245,6 +291,13 @@ function updateAuthUI() {
   $("myProfile").classList.toggle("hidden", !currentUser);
   $("userEmail").textContent = currentUser ? "Signed in as " + currentUser.email : "";
   $("profileEmail").textContent = currentUser?.email || "";
+
+  if (!currentUser) {
+    $("messages").classList.add("hidden");
+    $("notifications").classList.add("hidden");
+    $("messageCount").textContent = "";
+    $("notificationCount").textContent = "";
+  }
 }
 function formatDate(value) {
   if (!value) return "";
@@ -284,7 +337,7 @@ function setAvatar(element, name, url) {
   }
 }
 
-/* Create a notification for another member. */
+/* Notifications */
 async function createNotification(recipientId, type, postId, actionText) {
   if (!currentUser || !recipientId || recipientId === currentUser.id) return;
 
@@ -296,12 +349,9 @@ async function createNotification(recipientId, type, postId, actionText) {
     message: usernameFor(currentUser) + " " + actionText
   });
 
-  if (error) {
-    console.error("Notification could not be saved:", error.message);
-  }
+  if (error) console.error("Notification could not be saved:", error.message);
 }
 
-/* Load notifications belonging to the signed-in member only. */
 async function loadNotifications() {
   if (notificationsLoading) return;
   notificationsLoading = true;
@@ -331,37 +381,28 @@ async function loadNotifications() {
     list.replaceChildren();
 
     if (!rows.length) {
-      list.appendChild(makeElement(
-        "p", "muted small", "No notifications yet. When someone follows, likes, or comments, you'll see it here."
-      ));
+      list.appendChild(makeElement("p", "muted small",
+        "No notifications yet. When someone follows, likes, or comments, you'll see it here."));
       hideStatus("notificationStatus");
       return;
     }
 
     for (const item of rows) {
-      const card = makeElement(
-        "div",
-        "notification-item" + (item.read_at ? "" : " unread")
-      );
-
+      const card = makeElement("div",
+        "notification-item" + (item.read_at ? "" : " unread"));
       card.appendChild(makeElement("div", "notification-message", item.message));
       card.appendChild(makeElement("div", "notification-date", formatDate(item.created_at)));
 
       if (!item.read_at) {
         const readButton = makeElement("button", "notification-read", "Mark as read");
         readButton.type = "button";
-
         readButton.addEventListener("click", async () => {
           if (!currentUser) return;
           readButton.disabled = true;
-
           try {
-            const { error: updateError } = await client
-              .from("notifications")
+            const { error: updateError } = await client.from("notifications")
               .update({ read_at: new Date().toISOString() })
-              .eq("id", item.id)
-              .eq("recipient_id", currentUser.id);
-
+              .eq("id", item.id).eq("recipient_id", currentUser.id);
             if (updateError) throw updateError;
             await loadNotifications();
           } catch (error) {
@@ -369,13 +410,10 @@ async function loadNotifications() {
             readButton.disabled = false;
           }
         });
-
         card.appendChild(readButton);
       }
-
       list.appendChild(card);
     }
-
     hideStatus("notificationStatus");
   } catch (error) {
     showStatus("notificationStatus", "Could not load notifications: " + error.message, true);
@@ -383,17 +421,266 @@ async function loadNotifications() {
     notificationsLoading = false;
   }
 }
-
 $("refreshNotifications").addEventListener("click", loadNotifications);
 
+/* Private Messages */
+function selectedMessageMember() {
+  const userId = $("messageMember").value;
+  if (!userId) return null;
+  return {
+    user_id: userId,
+    display_name: $("messageMember").selectedOptions[0]?.dataset.name ||
+      $("messageMember").selectedOptions[0]?.textContent ||
+      "Kaybgram member"
+  };
+}
+
+async function loadMessageMembers() {
+  if (!currentUser) {
+    $("messageMember").replaceChildren(new Option("Sign in to see members", ""));
+    $("messageList").replaceChildren(
+      makeElement("p", "muted small", "Please sign in to use private messages.")
+    );
+    return;
+  }
+
+  const previousId = $("messageMember").value;
+  showStatus("messageStatus", "Loading Kaybgram members...");
+
+  try {
+    const { data, error } = await client
+      .from("profiles")
+      .select("user_id,display_name")
+      .neq("user_id", currentUser.id)
+      .order("display_name", { ascending: true })
+      .limit(100);
+
+    if (error) throw error;
+
+    const members = data || [];
+    const select = $("messageMember");
+    select.replaceChildren(new Option("Choose a member...", ""));
+
+    for (const member of members) {
+      const option = new Option(member.display_name || "Kaybgram member", member.user_id);
+      option.dataset.name = member.display_name || "Kaybgram member";
+      select.add(option);
+    }
+
+    if (members.some(member => member.user_id === previousId)) {
+      select.value = previousId;
+    }
+
+    if (!members.length) {
+      showStatus("messageStatus",
+        "No other profiles were found. Ask another Kaybgram member to sign in and save their profile.");
+      $("messageList").replaceChildren();
+      $("messageList").appendChild(
+        makeElement("p", "muted small", "No members available yet.")
+      );
+      return;
+    }
+
+    hideStatus("messageStatus");
+
+    if (select.value) {
+      await loadConversation();
+    } else {
+      $("messageList").replaceChildren(
+        makeElement("p", "muted small", "Choose a member to view messages.")
+      );
+    }
+  } catch (error) {
+    showStatus("messageStatus", "Could not load members: " + error.message, true);
+  }
+}
+
+async function loadConversation() {
+  if (messagesLoading) {
+    messagesReloadRequested = true;
+    return;
+  }
+
+  if (!currentUser) {
+    showStatus("messageStatus", "Please sign in to use private messages.", true);
+    return;
+  }
+
+  const member = selectedMessageMember();
+  if (!member) {
+    $("messageList").replaceChildren(
+      makeElement("p", "muted small", "Choose a member to view messages.")
+    );
+    return;
+  }
+
+  messagesLoading = true;
+  $("messageList").replaceChildren(
+    makeElement("p", "muted small", "Loading conversation...")
+  );
+
+  try {
+    // Fetch both directions separately to keep the conversation query reliable.
+    const sentRequest = client.from("messages")
+      .select("id,sender_id,receiver_id,message_text,created_at,read_at")
+      .eq("sender_id", currentUser.id)
+      .eq("receiver_id", member.user_id)
+      .order("created_at", { ascending: true })
+      .limit(200);
+
+    const receivedRequest = client.from("messages")
+      .select("id,sender_id,receiver_id,message_text,created_at,read_at")
+      .eq("sender_id", member.user_id)
+      .eq("receiver_id", currentUser.id)
+      .order("created_at", { ascending: true })
+      .limit(200);
+
+    const [sentResult, receivedResult] = await Promise.all([
+      sentRequest, receivedRequest
+    ]);
+
+    if (sentResult.error) throw sentResult.error;
+    if (receivedResult.error) throw receivedResult.error;
+
+    const messages = [
+      ...(sentResult.data || []),
+      ...(receivedResult.data || [])
+    ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    const list = $("messageList");
+    list.replaceChildren();
+
+    if (!messages.length) {
+      list.appendChild(
+        makeElement("p", "muted small", "No messages yet. Say hello!")
+      );
+    } else {
+      for (const message of messages) {
+        const mine = message.sender_id === currentUser.id;
+        const bubble = makeElement("div", "message-bubble" + (mine ? " mine" : ""));
+        bubble.appendChild(makeElement("div", "", message.message_text));
+
+        let metaText = (mine ? "You" : member.display_name) +
+          " · " + formatDate(message.created_at);
+        if (mine && message.read_at) metaText += " · Read";
+
+        bubble.appendChild(makeElement("div", "message-meta", metaText));
+        list.appendChild(bubble);
+      }
+
+      // Mark messages from this member as read.
+      const unreadIds = messages
+        .filter(message =>
+          message.sender_id === member.user_id &&
+          message.receiver_id === currentUser.id &&
+          !message.read_at
+        )
+        .map(message => message.id);
+
+      if (unreadIds.length) {
+        const { error: readError } = await client.from("messages")
+          .update({ read_at: new Date().toISOString() })
+          .in("id", unreadIds)
+          .eq("receiver_id", currentUser.id);
+
+        if (readError) {
+          console.warn("Could not mark messages as read:", readError.message);
+        }
+      }
+    }
+
+    list.scrollTop = list.scrollHeight;
+    hideStatus("messageStatus");
+    await loadMessageCount();
+  } catch (error) {
+    showStatus("messageStatus", "Could not load conversation: " + error.message, true);
+  } finally {
+    messagesLoading = false;
+    if (messagesReloadRequested) {
+      messagesReloadRequested = false;
+      loadConversation();
+    }
+  }
+}
+
+async function loadMessageCount() {
+  if (!currentUser) {
+    $("messageCount").textContent = "";
+    return;
+  }
+
+  try {
+    const { data, error } = await client.from("messages")
+      .select("id")
+      .eq("receiver_id", currentUser.id)
+      .is("read_at", null)
+      .limit(100);
+
+    if (error) throw error;
+    $("messageCount").textContent = data && data.length ? String(data.length) : "";
+  } catch (error) {
+    console.warn("Could not load unread message count:", error.message);
+  }
+}
+
+$("messageMember").addEventListener("change", loadConversation);
+
+$("refreshMessages").addEventListener("click", async () => {
+  await loadMessageMembers();
+  if (selectedMessageMember()) await loadConversation();
+});
+
+$("messageForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  hideStatus("messageStatus");
+
+  if (!currentUser) {
+    showStatus("messageStatus", "Please sign in before sending messages.", true);
+    return;
+  }
+
+  const member = selectedMessageMember();
+  if (!member) {
+    showStatus("messageStatus", "Please choose a member first.", true);
+    return;
+  }
+
+  const messageText = $("messageText").value.trim();
+  if (!messageText) {
+    showStatus("messageStatus", "Please type a message first.", true);
+    return;
+  }
+
+  const button = $("sendMessageBtn");
+  button.disabled = true;
+
+  try {
+    const { error } = await client.from("messages").insert({
+      sender_id: currentUser.id,
+      receiver_id: member.user_id,
+      message_text: messageText
+    });
+
+    if (error) throw error;
+
+    $("messageText").value = "";
+    await loadConversation();
+    showStatus("messageStatus", "Message sent successfully!");
+  } catch (error) {
+    showStatus("messageStatus", "Could not send message: " + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+/* Profile */
 async function loadMyProfile() {
   if (!currentUser) {
     currentProfile = null;
     return;
   }
 
-  const { data, error } = await client
-    .from("profiles")
+  const { data, error } = await client.from("profiles")
     .select("user_id,display_name,bio,avatar_url")
     .eq("user_id", currentUser.id)
     .maybeSingle();
@@ -422,6 +709,7 @@ function renderMyProfile() {
   setAvatar($("profileAvatar"), name, currentProfile?.avatar_url);
 }
 
+/* Feed */
 async function loadPosts() {
   if (postsLoading) {
     reloadRequested = true;
@@ -434,8 +722,7 @@ async function loadPosts() {
   showStatus("feedStatus", "Loading posts...");
 
   try {
-    const { data: posts, error } = await client
-      .from("posts")
+    const { data: posts, error } = await client.from("posts")
       .select("id,user_id,username,content,created_at")
       .order("created_at", { ascending: false });
 
@@ -450,36 +737,32 @@ async function loadPosts() {
     let comments = [];
     let profiles = [];
     let followedUserIds = new Set();
-
     const authorIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
 
     if (authorIds.length) {
-      const { data, error: profilesError } = await client
-        .from("profiles")
+      const { data, error: profilesError } = await client.from("profiles")
         .select("user_id,display_name,bio,avatar_url")
         .in("user_id", authorIds);
-
       if (profilesError) throw profilesError;
       profiles = data || [];
     }
 
     if (currentUser) {
-      const { data, error: likesError } = await client
-        .from("likes").select("post_id,user_id");
+      const { data, error: likesError } = await client.from("likes")
+        .select("post_id,user_id");
       if (likesError) throw likesError;
       likes = data || [];
 
       const postIds = posts.map(post => post.id);
-      const { data: commentRows, error: commentsError } = await client
-        .from("comments")
+      const { data: commentRows, error: commentsError } = await client.from("comments")
         .select("id,post_id,user_id,content,created_at")
         .in("post_id", postIds)
         .order("created_at", { ascending: true });
       if (commentsError) throw commentsError;
       comments = commentRows || [];
 
-      const { data: followRows, error: followsError } = await client
-        .from("follows").select("following_id")
+      const { data: followRows, error: followsError } = await client.from("follows")
+        .select("following_id")
         .eq("follower_id", currentUser.id);
       if (followsError) throw followsError;
       followedUserIds = new Set((followRows || []).map(row => row.following_id));
@@ -562,7 +845,6 @@ function createPostCard(post, likeCount, liked, comments, profile, isFollowing =
             following_id: post.user_id
           });
           if (error) throw error;
-
           await createNotification(post.user_id, "follow", null, "started following you.");
         }
         await loadPosts();
@@ -571,7 +853,6 @@ function createPostCard(post, likeCount, liked, comments, profile, isFollowing =
         followButton.disabled = false;
       }
     });
-
     head.appendChild(followButton);
   }
 
@@ -607,17 +888,13 @@ function createPostCard(post, likeCount, liked, comments, profile, isFollowing =
         });
       }
       if (result.error) throw result.error;
-
-      if (!liked) {
-        await createNotification(post.user_id, "like", post.id, "liked your post.");
-      }
+      if (!liked) await createNotification(post.user_id, "like", post.id, "liked your post.");
       await loadPosts();
     } catch (error) {
       showStatus("feedStatus", "Could not update your like: " + error.message, true);
       likeButton.disabled = false;
     }
   });
-
   actions.appendChild(likeButton);
 
   const commentButton = makeElement("button", "action-btn", "Comment (" + comments.length + ")");
@@ -716,7 +993,6 @@ function createPostCard(post, likeCount, liked, comments, profile, isFollowing =
         post_id: post.id, user_id: currentUser.id, content
       });
       if (error) throw error;
-
       await createNotification(post.user_id, "comment", post.id, "commented on your post.");
       commentInput.value = "";
       showStatus("feedStatus", "Your comment was saved!");
@@ -744,6 +1020,7 @@ function createPostCard(post, likeCount, liked, comments, profile, isFollowing =
   return card;
 }
 
+/* Save and upload profile */
 async function saveProfileData(avatarUrl) {
   const displayName = $("displayName").value.trim();
   const bio = $("bio").value.trim();
@@ -757,7 +1034,8 @@ async function saveProfileData(avatarUrl) {
     updated_at: new Date().toISOString()
   };
 
-  const { error } = await client.from("profiles").upsert(profileData, { onConflict: "user_id" });
+  const { error } = await client.from("profiles")
+    .upsert(profileData, { onConflict: "user_id" });
   if (error) throw error;
 
   currentProfile = profileData;
@@ -800,7 +1078,11 @@ $("uploadPhotoBtn").addEventListener("click", async () => {
 
   try {
     const { error: uploadError } = await client.storage.from(PHOTO_BUCKET)
-      .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type
+      });
     if (uploadError) throw uploadError;
 
     const { data: publicData } = client.storage.from(PHOTO_BUCKET).getPublicUrl(filePath);
@@ -843,6 +1125,7 @@ $("profileForm").addEventListener("submit", async event => {
   }
 });
 
+/* Authentication */
 $("authForm").addEventListener("submit", async event => {
   event.preventDefault();
   hideStatus("authStatus");
@@ -860,6 +1143,7 @@ $("authForm").addEventListener("submit", async event => {
     showStatus("authStatus", "You are signed in successfully.");
     await loadPosts();
     await loadNotifications();
+    await loadMessageCount();
   } catch (error) {
     showStatus("authStatus", error.message || "Sign-in failed.", true);
   } finally {
@@ -896,6 +1180,7 @@ $("signUpBtn").addEventListener("click", async () => {
       showStatus("authStatus", "Your account has been created and you are signed in.");
       await loadPosts();
       await loadNotifications();
+      await loadMessageCount();
     } else {
       showStatus("authStatus", "Account created. Check your email for the confirmation link, then sign in.");
     }
@@ -920,8 +1205,10 @@ $("signOutBtn").addEventListener("click", async () => {
   showStatus("authStatus", "You have signed out.");
   await loadPosts();
   await loadNotifications();
+  await loadMessageCount();
 });
 
+/* Publish posts */
 $("postForm").addEventListener("submit", async event => {
   event.preventDefault();
   hideStatus("postStatus");
@@ -957,29 +1244,33 @@ $("postForm").addEventListener("submit", async event => {
   }
 });
 
-/* Navigation reveals the selected panel, including Notifications. */
+/* Navigation */
 document.querySelectorAll('nav a[href^="#"]').forEach(link => {
   link.addEventListener("click", event => {
     const targetId = link.getAttribute("href").slice(1);
     const target = $(targetId);
     if (!target) return;
 
-    if (["notifications", "myProfile", "create"].includes(targetId) && !currentUser) {
+    const privatePanels = ["notifications", "messages", "myProfile", "create"];
+    if (privatePanels.includes(targetId) && !currentUser) {
       event.preventDefault();
       showStatus("authStatus", "Please sign in to use this feature.", true);
       $("account").scrollIntoView({ behavior: "smooth" });
       return;
     }
 
-    if (["notifications", "myProfile", "create"].includes(targetId)) {
+    if (privatePanels.includes(targetId)) {
       event.preventDefault();
       target.classList.remove("hidden");
       target.scrollIntoView({ behavior: "smooth", block: "start" });
+
       if (targetId === "notifications") loadNotifications();
+      if (targetId === "messages") loadMessageMembers();
     }
   });
 });
 
+/* Start website and restore saved login */
 async function startKaybgram() {
   try {
     const { data, error } = await client.auth.getSession();
@@ -997,6 +1288,7 @@ async function startKaybgram() {
 
     await loadPosts();
     await loadNotifications();
+    await loadMessageCount();
   } catch (error) {
     showStatus("feedStatus", "Could not connect to Kaybgram: " + error.message, true);
   }
@@ -1012,6 +1304,7 @@ client.auth.onAuthStateChange((_event, session) => {
         await loadMyProfile();
         await loadPosts();
         await loadNotifications();
+        await loadMessageCount();
       } catch (error) {
         showStatus("profileStatus", "Could not load your profile: " + error.message, true);
       }
@@ -1020,6 +1313,7 @@ client.auth.onAuthStateChange((_event, session) => {
     currentProfile = null;
     loadPosts();
     loadNotifications();
+    loadMessageCount();
   }
 });
 
